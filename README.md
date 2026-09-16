@@ -14,7 +14,7 @@ Market: United States.
 ## Setup from zero
 
 ```bash
-git clone <this repo> && cd creative-intelligence
+git clone https://github.com/hemant0024/tiktok-viral-check-.git && cd tiktok-viral-check-
 cp .env.example .env          # then fill it in, see below
 docker compose up -d
 docker compose exec ci python -m ci healthcheck
