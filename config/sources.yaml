@@ -1,0 +1,180 @@
+# Spec section 4. Market focus is US.
+
+categories:
+  - language learning
+  - education
+  - ai apps
+  - consumer ai
+  - productivity
+  - self improvement
+  - career
+  - dating
+  - finance
+  - fitness
+  - entertainment
+  - mobile apps
+  - technology
+  - study
+  - lifestyle
+
+youtube:
+  enabled: true
+  region_code: "US"
+  relevance_language: "en"
+  # search.list costs 100 units of a 10,000/day quota. This is the hard ceiling.
+  daily_quota_units: 10000
+  reserved_units: 1500          # headroom for retries and manual pulls
+  max_search_calls: 60          # 6,000 units
+  results_per_search: 50
+  published_within_days: 14
+  video_duration: "short"       # Shorts-first
+  # 4 rotating query templates per category per day.
+  query_templates:
+    - "{category} tips"
+    - "{category} hack"
+    - "why you {category}"
+    - "{category} mistake"
+  tracked_channel_ids: []       # pulled via uploads playlist at 1 unit, not search at 100
+
+tiktok:
+  enabled: true
+  # Two actors, because the cheap one does not work on a free Apify plan.
+  #
+  # apidojo is $0.0003 per video flat with no add-on charges, which is about
+  # 23x cheaper. Verified 2026-09-11: on the FREE plan it returns the
+  # {"noResults": true} sentinel for EVERY call, search and direct URL alike,
+  # so it is effectively paid-only. The moment the plan is upgraded it becomes
+  # the right choice by a wide margin.
+  #
+  # clockworks works on the free plan today but charges $0.003 per video plus
+  # $0.0013 for each of the sorting, date and country filters we need, so
+  # $0.0069 all in.
+  #
+  # The collector tries `actor` first and falls back to `fallback_actor` when the
+  # primary throttles, and records which one produced the run.
+  actor: "apidojo/tiktok-scraper"
+  fallback_actor: "clockworks/free-tiktok-scraper"
+
+  # Per-actor input shapes. The two actors want completely different field names
+  # for the same three ideas: which keywords, how many results, and which country.
+  # $KEYWORDS, $MAX and $COUNTRY are substituted at call time.
+  actor_inputs:
+    "apidojo/tiktok-scraper":
+      # Flat per result. No add-on charges at all, which is most of the gap.
+      cost_per_video_usd: 0.0003
+      cost_per_video_by_url_usd: 0.0003
+      input:
+        keywords: "$KEYWORDS"
+        maxItems: "$MAX"
+        location: "$COUNTRY"
+        sortType: "DATE_POSTED"
+        dateRange: "THIS_WEEK"
+        includeSearchKeywords: true
+      by_url:
+        startUrls: "$URLS"
+        maxItems: "$MAX"
+    "clockworks/free-tiktok-scraper":
+      # $0.003 per result, plus $0.0013 each for the sorting, date and country
+      # filters a keyword search needs. A direct-URL poll needs none of them.
+      cost_per_video_usd: 0.0069
+      cost_per_video_by_url_usd: 0.003
+      input:
+        searchQueries: "$KEYWORDS"
+        resultsPerPage: "$MAX"
+        proxyCountryCode: "$COUNTRY"
+        searchSection: "/video"
+        videoSearchSorting: "LATEST"
+        videoSearchDateFilter: "PAST_WEEK"
+        shouldDownloadVideos: false
+        shouldDownloadCovers: false
+        shouldDownloadSlideshowImages: false
+      by_url:
+        postURLs: "$URLS"
+        resultsPerPage: 1
+        shouldDownloadVideos: false
+        shouldDownloadCovers: false
+  location: "US"
+  # Two passes per run. This pairing is what separates "already viral"
+  # from "turning viral": same query, ranked by likes vs by recency.
+  passes:
+    - name: proven
+      sort_type: "MOST_LIKED"
+      date_range: "THIS_WEEK"
+      max_items_per_keyword: 25
+    - name: breakout
+      sort_type: "DATE_POSTED"
+      date_range: "THIS_WEEK"
+      max_items_per_keyword: 40
+  keywords_per_run: 12
+  keyword_templates:
+    - "{category}"
+    - "{category} tips"
+    - "how to {category}"
+  # Creators whose new posts we re-check every run to build snapshot history.
+  tracked_usernames: []
+
+meta_ads:
+  enabled: true
+  # apify/facebook-ads-scraper, official Apify actor, $0.0058 per ad.
+  # The official Meta Ad Library API returns NO US commercial ads, so this is the US route.
+  actor: "apify/facebook-ads-scraper"
+  country: "US"
+  active_status: "active"
+  results_limit_per_page: 40
+  # startDate never changes, so a daily full sweep buys nothing. Daily runs find
+  # new ads; one weekly sweep catches ads that stopped. Cuts the bill ~80%.
+  incremental: true
+  first_run_lookback_days: 30
+  full_sweep_weekday: 0            # Monday
+  full_sweep_lookback_days: 120
+  variation_similarity: 0.75
+
+instagram:
+  # No trend discovery API exists for content we do not own. Stub only.
+  enabled: false
+
+csv_import:
+  enabled: true
+  watch_dir: "./data/inbox"
+
+competitor_ugc:
+  # Organic creator videos that mention a competitor app. Where their next ad
+  # usually comes from.
+  enabled: true
+  # 0 means every configured keyword. The old cap of 24 against 57 configured
+  # keywords silently skipped more than half the competitor list every run, and
+  # the ones it skipped looked identical to the ones that genuinely had nothing.
+  keywords_per_run: 0
+  # One keyword per actor call. Batching six keywords returned ten results that
+  # all came from the first one, silently skipping five competitors.
+  keywords_per_call: 1
+  # The free Apify tier throttles after roughly 5-6 search calls and returns a
+  # {"noResults": true} sentinel instead of an error. Verified: the same keyword
+  # returned 10 real videos, then nothing, 8 minutes later.
+  # Three empty results in a row stops the sweep, and the remaining keywords are
+  # recorded as NOT CHECKED rather than as zero.
+  throttle_after: 3
+  pace_seconds: 3.0
+  # Drop videos that matched TikTok's fuzzy search but never actually name the app.
+  require_attribution: true
+  # Drop posts made BY a competitor's own account. We track videos and hooks, not
+  # accounts. A brand posting its own content is marketing, not a signal.
+  exclude_brand_owned: true
+  # Recency first, deliberately. Sorting by most-viewed only ever finds what has
+  # already happened. The takeoff window is the first 24 to 48 hours, so that is
+  # where the budget goes.
+  passes:
+    - name: today
+      sort_type: "DATE_POSTED"
+      date_range: "YESTERDAY"
+      max_items_per_keyword: 20
+    - name: this_week
+      sort_type: "DATE_POSTED"
+      date_range: "THIS_WEEK"
+      max_items_per_keyword: 10
+    # A small most-liked pass stays, but only as context for what a good video
+    # in this niche looks like. It is not where the leads come from.
+    - name: context
+      sort_type: "MOST_LIKED"
+      date_range: "THIS_WEEK"
+      max_items_per_keyword: 4

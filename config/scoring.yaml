@@ -1,0 +1,385 @@
+# Every weight and threshold. No literals in code. Spec sections 8, 9, 11, 16.
+
+cheap_filter:
+  # Spec section 26: 100 raw -> ~50 candidates, before any LLM spend.
+  min_views: 5000
+  min_engagement_rate: 0.02
+  max_age_days: 30
+  min_duration_seconds: 3
+  # Short form only. TikTok now allows 20+ minute videos and they are not
+  # what this system is for. This cap is also the single biggest lever on
+  # video-analysis token cost.
+  max_duration_seconds: 120
+  require_title_or_description: true
+  target_candidates: 50
+  # The filter does not just cut, it RANKS. The candidates that reach the
+  # LLM are the hottest movers, not whichever came back first.
+  rank_by_heat: true
+  heat:
+    velocity_weight: 0.55        # views per day
+    acceleration_weight: 0.30    # is it speeding up
+    engagement_weight: 0.15      # saves + shares carry more than likes
+    freshness_bonus_hours: 48    # published inside this window gets a lift
+    freshness_bonus: 1.25
+    # Reserve part of the candidate slate for young videos that have not
+    # accumulated views yet, so breakouts are never crowded out by
+    # yesterday's already-big winners.
+    breakout_reserved_share: 0.4
+
+velocity:
+  # 0.5h, not 12h. The 12 hour gap was written for once-a-day snapshots. Now that
+  # `ci watch` polls candidates every 30 minutes and hourly distribution waves are
+  # the core signal, a 12 hour gap threw away almost every reading and reported
+  # "one snapshot only" on videos that had six.
+  min_snapshot_gap_hours: 0.5
+  single_snapshot_confidence: 0.7
+  multi_snapshot_confidence: 1.0
+  # Only content published inside this window feeds momentum. Older content is
+  # kept as reference material for DNA but never scored for momentum.
+  lookback_days: 30
+
+breakout:
+  # "Turning viral" is acceleration, not absolute views.
+  min_snapshots_for_acceleration: 3
+  max_age_hours: 96
+  min_velocity_floor: 2000        # views/day before we call anything a breakout
+  acceleration_bonus_max: 1.35    # multiplier applied to momentum_score
+  # A young video with a high views/day but only 2 snapshots still counts,
+  # at reduced confidence.
+  provisional_bonus: 1.15
+
+momentum:
+  velocity_floor_log10: 2.0       # 100 views/day  -> 0
+  velocity_ceiling_log10: 6.0     # 1,000,000/day  -> 100
+
+saturation:
+  weights:
+    recent_occurrences: 20
+    distinct_brands: 15
+    distinct_competitors: 15
+    trend_age_days: 12
+    exact_wording_repetition: 14
+    visual_repetition: 12
+    audio_repetition: 6
+    distinct_categories: 6
+  norms:
+    recent_occurrences: [1, 60]
+    distinct_brands: [0, 15]
+    distinct_competitors: [0, 8]
+    trend_age_days: [0, 45]
+    exact_wording_repetition: [0.0, 1.0]
+    visual_repetition: [0.0, 1.0]
+    audio_repetition: [0.0, 1.0]
+    distinct_categories: [1, 10]
+
+cross_category:
+  norm: [1, 8]
+
+opportunity:
+  # Spec section 8 weights, unchanged. novelty is defined as 100 - saturation
+  # so the formula penalises crowding on its own, which is what section 8 asks for.
+  weights:
+    momentum: 0.30
+    cross_category: 0.20
+    novelty: 0.20
+    audience_relevance: 0.15
+    product_applicability: 0.15
+
+lifecycle:
+  exhausted_saturation: 80
+  saturating_saturation: 60
+  emerging_saturation: 35
+  emerging_max_age_days: 7
+  rising_momentum: 60
+  falling_days_for_exhausted: 3
+
+hook_score:
+  # Spec section 16.
+  weights:
+    attention_potential: 0.25
+    curiosity: 0.20
+    novelty: 0.15
+    product_relevance: 0.15
+    audience_relevance: 0.10
+    visual_potential: 0.10
+    production_simplicity: 0.05
+
+clustering:
+  auto_match_similarity: 0.86
+  adjudicate_similarity: 0.72
+  max_candidates_to_llm: 3
+
+originality:
+  trigram_jaccard_max: 0.60
+  longest_common_run_max_words: 7
+  embedding_cosine_max: 0.93
+  corpus_neighbours: 200
+
+quality_gate:
+  min_hook_score: 55
+  min_product_relevance: 50
+  max_saturation: 80
+  min_hook_words: 3
+  max_hook_words: 30
+  banned_phrases:
+    - will go viral
+    - guaranteed to go viral
+    - this will blow up
+    - guaranteed
+    - 100% works
+    - instantly fluent
+    - fluent in 7 days
+  opportunity_labels:
+    high: 75
+    medium: 55
+    experimental: 35
+
+generation:
+  patterns_per_day: 5
+  hooks_per_pattern: 5
+  report_top_hooks: 20
+  report_top_patterns: 10
+  report_top_ads: 5
+  # Spec section 21. Applies once winners exist.
+  proven_ratio: 0.7
+  experimental_ratio: 0.3
+
+pipeline:
+  raw_per_day: 100
+  candidates_per_day: 50
+  patterns_per_day: 20
+  trends_per_day: 10
+
+# --------------------------------------------------------------------------- #
+# Viral radar. Per VIDEO, not per pattern. This is the "who is catching fire
+# right now" feed, and it is the thing we want to be first to.
+# --------------------------------------------------------------------------- #
+radar:
+  weights:
+    waves: 0.22             # distribution waves, the strongest tell of all
+    vs_expected: 0.20       # views relative to AGE, not raw views
+    acceleration: 0.18      # is it speeding up
+    engagement: 0.15        # share rate weighted heaviest, see viral_signals
+    creator_lift: 0.15      # how far above this creator's own normal
+    velocity: 0.05          # raw speed matters least, it is the laggiest signal
+    freshness: 0.05
+  # Floors are deliberately LOW. The whole premise is catching things while the
+  # absolute numbers are still small, so a 300 views/day video from a 92-follower
+  # account has to register. A high floor would only ever find what is already big.
+  # Getting views without being shared is not the same as taking off.
+  no_spread_penalty: 0.7
+  velocity_norm_log10: [1.5, 5.5]       # 32/day -> 0, 316,000/day -> 100
+  acceleration_norm_log10: [1.5, 5.5]
+  min_snapshots_for_acceleration: 3
+  creator_lift_norm: [1.0, 10.0]        # 1x normal -> 0, 10x normal -> 100
+  min_videos_for_baseline: 3
+  # With too little history for a real baseline, fall back to views per follower.
+  # A video pulling more views than the creator has followers is reaching beyond
+  # their audience, which is what going viral actually means.
+  fallback_views_per_follower_norm: [0.2, 5.0]
+  freshness_half_life_hours: 36
+
+  status:
+    exploding:
+      min_score: 70
+      requires_positive_acceleration: true
+      max_age_hours: 96
+    climbing:
+      min_score: 50
+      requires_positive_acceleration: true
+    early_signal:
+      min_score: 35
+      max_age_hours: 48
+    cooling_acceleration_below: 0
+
+  feed:
+    max_rows: 25
+    min_score_to_show: 30
+    # Only show these size-for-age tiers. Empty list means all of them.
+    #
+    # WATCH is everything under 24h that has not done anything yet, and it is
+    # always the biggest group by far (31 of 52 on 2026-09-11). Useful in the
+    # sheet, noise in a morning list you are meant to read in two minutes.
+    # BREAKING OUT and INTERESTING are the two that mean "this is unusual for
+    # its age", which is the whole question the radar exists to answer.
+    #
+    # Note this is a DISPLAY filter, not a collection filter. Everything still
+    # gets collected, scored and written to the sheet, so tomorrow's trends and
+    # the learned baseline are unaffected.
+    tiers_to_show: ["EXPLODING", "BREAKING OUT", "INTERESTING"]
+    # Never let one loud creator own the feed.
+    max_per_creator: 3
+    max_per_competitor: 6
+    # Five ad IDs of one concept is one thing to look at.
+    collapse_variation_groups: true
+
+# Ads carry no view counts. The Meta Ad Library exposes none, by design. So a
+# views-based radar score is meaningless for them and they need their own signal.
+# An ad that costs money to run and keeps running is almost always converting.
+winner_signal:
+  weights:
+    days_running: 0.30
+    variations: 0.20
+    hook_reused_by_others: 0.15    # filled in once patterns exist
+    relaunched_or_scaled: 0.15
+    engagement: 0.10               # usually 0 on Meta, real on TikTok ads
+    platforms: 0.10
+  days_running_norm: [3, 60]       # 3 days -> 0, 60+ days -> 100
+  variations_norm: [1, 8]
+  platforms_norm: [1, 4]
+  status:
+    proven_winner: 70
+    likely_winner: 50
+    new_watch_it: 30
+
+# --------------------------------------------------------------------------- #
+# Viral phase detection.
+#
+# Bands are Hemant's, from his own benchmarks. The key idea is that no single
+# metric decides anything: velocity + engagement + waves together do.
+#
+# NOT OBTAINABLE for competitor videos, so deliberately absent below: watch time,
+# completion rate, rewatch rate. Those are creator-side analytics and no public
+# API or scraper returns them for a video you do not own. The one exception is
+# TikTok ads via Creative Center enrichment, which does expose a retention curve.
+# --------------------------------------------------------------------------- #
+viral_signals:
+  ratios:
+    # share_rate is weighted highest on purpose. A like says "I enjoyed this".
+    # A share says "someone else needs to see this", and for finding an ad
+    # concept worth rebuilding, that difference is the whole game.
+    share_rate:   {normal: 0.005, elevated: 0.010, viral: 0.030, weight: 0.35}
+    save_rate:    {normal: 0.003, elevated: 0.005, viral: 0.010, weight: 0.25}
+    comment_rate: {normal: 0.002, elevated: 0.005, viral: 0.010, weight: 0.20}
+    like_rate:    {normal: 0.060, elevated: 0.080, viral: 0.150, weight: 0.20}
+
+  waves:
+    # "Distribution waves": TikTok pushing a video to progressively larger
+    # audiences. Each wave bigger than the last is the real tell.
+    min_readings: 3
+    wave_ratio_threshold: 1.5      # this hour vs last hour
+    strong_wave_ratio: 2.5
+    min_hourly_views: 200          # ignore noise on tiny videos
+    # 1,000 -> 2,500 -> 7,000 -> 22,000 -> 70,000 is 4 waves of ~2.5x-3x.
+    waves_for_breakout: 2
+    waves_for_confirmed: 3
+
+  phases:
+    # Named for what to DO, not for a prediction.
+    pre_viral:     {min_score: 45, requires_waves: 1, max_age_hours: 48}
+    breaking_out:  {min_score: 62, requires_waves: 2, max_age_hours: 96}
+    viral:         {min_score: 78, requires_waves: 3}
+    peaked:        {wave_ratio_below: 1.0}
+
+  trajectory:
+    # Rough projection from the current wave ratio. Shown as a range, never a promise.
+    project_hours: [6, 24]
+    milestones: [10000, 100000, 1000000]
+    # Wave ratios decay toward 1 fast. Without this, compounding 2.7x for 24
+    # hours projected 686 billion views.
+    ratio_decay_per_hour: 0.55
+    max_projection_multiple: 60
+
+  # High frequency polling. Daily snapshots cannot see hourly waves, so anything
+  # that looks interesting goes on a watchlist and gets checked far more often.
+  watchlist:
+    enabled: true
+    add_above_score: 35
+    add_if_age_hours_below: 72
+    poll_minutes: 30
+    max_tracked: 60
+    drop_after_hours: 168
+    drop_if_peaked_for_hours: 12
+
+# --------------------------------------------------------------------------- #
+# Takeoff detection.
+#
+# The question is NOT "which video has the most views". It is "which video is
+# getting far more attention than it should for how old it is".
+#
+#   2M views, 3 weeks old   -> already viral, we are late, DOWNRANK
+#   800K views, 2 days old  -> probably already viral
+#   18K views, 4 hours old, climbing -> THIS
+#   7K views, 1 hour old, big engagement -> THIS
+# --------------------------------------------------------------------------- #
+takeoff:
+  # What a NORMAL video does at each age, used as the denominator for pace.
+  #
+  # These are a cold-start fallback only. Measured against a real US pull on
+  # 2026-09-10, the median competitor-keyword video had about 8.5K views at 18
+  # hours. A curve set at viral-trajectory numbers made almost every real video
+  # read as "below par" and killed the pace signal entirely.
+  #
+  # `learn_from_data` replaces these with our own observed medians as soon as we
+  # have enough history, which is the only baseline that stays honest as the
+  # niche shifts.
+  expected_curve:
+    1: 150
+    3: 600
+    6: 1500
+    12: 4000
+    24: 9000
+    48: 15000
+
+  learn_baseline:
+    enabled: true
+    min_samples_per_bucket: 8      # below this, fall back to expected_curve
+    buckets_hours: [1, 3, 6, 12, 24, 48, 72]
+    lookback_days: 14
+
+  # The viral trajectory. Hitting this is what a 100 pace score means.
+  # These are Hemant's original numbers, which describe takeoff, not normal.
+  viral_curve:
+    1: 5000
+    3: 20000
+    6: 60000
+    12: 150000
+    24: 300000
+    48: 500000
+
+  vs_expected_norm: [1.0, 20.0]    # 1x normal -> 0, 20x normal -> 100
+
+  # Tiers are views AND age together. Age alone or views alone means nothing.
+  tiers:
+    - {name: "EXPLODING",    min_views: 200000, max_age_hours: 24}
+    - {name: "BREAKING OUT", min_views: 50000,  max_age_hours: 24}
+    - {name: "INTERESTING",  min_views: 10000,  max_age_hours: 24}
+    - {name: "WATCH",        min_views: 0,      max_age_hours: 24}
+    - {name: "DAY TWO",      min_views: 0,      max_age_hours: 48}
+
+  already_viral:
+    # Past this it is done. Everyone has seen it, the copies have started, and
+    # studying it now means arriving after the market. Heavily downranked rather
+    # than dropped, so it still shows up as context.
+    min_views: 500000
+    older_than_hours: 48
+    penalty_multiplier: 0.25
+    label: "ALREADY VIRAL"
+
+  # Beyond this a video is not a takeoff candidate at all, whatever it is doing.
+  max_candidate_age_hours: 72
+
+  # The jackpot: a small account suddenly getting huge numbers.
+  jackpot:
+    max_creator_followers: 50000
+    min_lift: 5.0
+    # "Suddenly getting huge numbers" has to mean numbers. Without a floor,
+    # lift alone flagged 24 of 52 videos on 11 Sep, including 348 views from a
+    # 24-follower account: a tiny account beats its own tiny normal by 5x on an
+    # ordinary day, so the badge meant nothing. 5,000 is half the INTERESTING
+    # threshold, which keeps 4 of those 24.
+    min_views: 5000
+    bonus_multiplier: 1.25
+
+
+# Day over day movement. Only computable from kept history, which is why RADAR
+# is keyed on (date, content_id) and never overwritten.
+trends:
+  lookback_days: 14
+  min_score_delta: 3.0
+  top_hashtags: 15
+
+sheet:
+  # How much history the shared sheet carries. Everything stays in local storage
+  # regardless; this only bounds what gets pushed.
+  history_days: 180

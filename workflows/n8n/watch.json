@@ -1,0 +1,206 @@
+{
+  "name": "Competitor Viral Radar - watchlist (every 30 min)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "id": "trigger",
+      "name": "Every 30 minutes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ci:8000/run/watch",
+        "options": {
+          "timeout": 600000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "watch",
+      "name": "Re-poll the watchlist",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This fires 48 times a day. It must be silent unless something actually\n// moved, or nobody will read any of it.\nconst j = $input.first().json || {};\nconst counts = j.counts || {};\nconst moved = counts.moved || 0;\nconst polled = j.result?.polled ?? 0;\nconst failed = (j.failures || []).length > 0 || j.ok === false;\nconst worthSaying = failed || moved >= 3;\nreturn [{ json: {\n  worthSaying,\n  polled,\n  moved,\n  text: failed\n    ? `Watchlist poll failed: ${j.error || 'see run log'}`\n    : `${moved} watchlist videos moved in the last 30 minutes (of ${polled} polled)`,\n}}];"
+      },
+      "id": "gate",
+      "name": "Worth saying anything?",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        280,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "w1",
+              "leftValue": "={{ $json.worthSaying }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "if",
+      "name": "Only if it moved",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        520,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://slack.com/api/chat.postMessage",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SLACK_BOT_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "channel",
+              "value": "={{ $env.SLACK_CHANNEL }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.text }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "notify",
+      "name": "Tell Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        220
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { quiet: true } }];"
+      },
+      "id": "quiet",
+      "name": "Stay quiet",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        760,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Every 30 minutes": {
+      "main": [
+        [
+          {
+            "node": "Re-poll the watchlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Re-poll the watchlist": {
+      "main": [
+        [
+          {
+            "node": "Worth saying anything?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Worth saying anything?": {
+      "main": [
+        [
+          {
+            "node": "Only if it moved",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Only if it moved": {
+      "main": [
+        [
+          {
+            "node": "Tell Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stay quiet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "none"
+  },
+  "pinData": {}
+}

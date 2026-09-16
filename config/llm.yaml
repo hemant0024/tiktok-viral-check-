@@ -1,0 +1,29 @@
+# Model tiers and prices. Prices are USD per 1,000,000 tokens.
+# Verified 2026-09-10. Update here, never in code.
+
+providers:
+  openai:
+    base_url_env: OPENAI_BASE_URL
+    api_key_env: OPENAI_API_KEY
+  gemini:
+    api_key_env: GEMINI_API_KEY
+
+pricing:
+  # OpenAI. Spec section 2 prefers this provider for all text stages.
+  gpt-5.6-luna:   {input: 0.20, cached_input: 0.02, output: 1.20}
+  gpt-5.6-sol:    {input: 4.00, cached_input: 0.40, output: 20.00}
+  gpt-6-astra:    {input: 10.00, cached_input: 1.00, output: 50.00}
+  # Gemini. Used only for video understanding on public YouTube URLs, because
+  # OpenAI has no native video input.
+  gemini-3.8-flash:      {input: 0.75, cached_input: 0.075, output: 3.75}
+  gemini-3.5-flash-lite: {input: 0.30, cached_input: 0.30,  output: 2.50}
+  fake-cheap:  {input: 0.0, cached_input: 0.0, output: 0.0}
+  fake-strong: {input: 0.0, cached_input: 0.0, output: 0.0}
+
+limits:
+  timeout_seconds: 90
+  max_retries: 4
+  retry_backoff_seconds: 2
+  max_output_tokens: 4096
+  # Hard stop so a runaway loop cannot spend the month's budget in one run.
+  max_cost_per_run_usd: 5.00

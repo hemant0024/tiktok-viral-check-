@@ -1,0 +1,407 @@
+{
+  "name": "Competitor Viral Radar - daily",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger",
+      "name": "6am America/New_York",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ci:8000/run/collect_competitor_ugc",
+        "options": {
+          "timeout": 900000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "ugc",
+      "name": "Collect competitor UGC",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        200
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ci:8000/run/collect_meta_ads",
+        "options": {
+          "timeout": 900000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "ads",
+      "name": "Collect competitor ads",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        400
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll",
+        "options": {}
+      },
+      "id": "join",
+      "name": "Wait for both",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        180,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ci:8000/run/radar",
+        "options": {
+          "timeout": 900000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "radar",
+      "name": "Viral radar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ci:8000/run/trends",
+        "options": {
+          "timeout": 900000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "trends",
+      "name": "Day over day trends",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        620,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ci:8000/run/sheets_push",
+        "options": {
+          "timeout": 900000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "sheet",
+      "name": "Update Google Sheet",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        840,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://ci:8000/run/notify_radar",
+        "options": {
+          "timeout": 900000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "slack",
+      "name": "Send radar to Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1060,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Collect what every stage reported, so the alert can say what actually broke\n// rather than just that something did.\nconst stages = [];\nfor (const item of $input.all()) {\n  const j = item.json || {};\n  if (!j.stage) continue;\n  stages.push({\n    stage: j.stage,\n    status: j.status || (j.ok ? 'ok' : 'failed'),\n    ok: j.ok !== false,\n    seconds: j.duration_seconds,\n    counts: j.counts || {},\n    failures: j.failures || [],\n    error: j.error || '',\n  });\n}\nconst broken = stages.filter(s => !s.ok || s.status === 'failed');\nconst partial = stages.filter(s => s.status === 'partial');\nconst lines = [];\nfor (const s of broken) lines.push(`FAILED  ${s.stage}: ${s.error || 'see run log'}`);\nfor (const s of partial) {\n  for (const f of s.failures.slice(0, 3)) {\n    lines.push(`partial ${s.stage} -> ${f.scope}:${f.item} ${String(f.error).slice(0, 90)}`);\n  }\n}\nreturn [{ json: {\n  healthy: broken.length === 0,\n  broken: broken.length,\n  partial: partial.length,\n  stages,\n  alert_text: lines.length\n    ? `Competitor Viral Radar had problems this morning:\\n${lines.join('\\n')}`\n    : '',\n}}];"
+      },
+      "id": "summarise",
+      "name": "Build run summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.healthy }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check",
+      "name": "Anything broken?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://slack.com/api/chat.postMessage",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SLACK_BOT_TOKEN }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "channel",
+              "value": "={{ $env.SLACK_CHANNEL }}"
+            },
+            {
+              "name": "text",
+              "value": "={{ $json.alert_text }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "alert",
+      "name": "Failure alert to Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1720,
+        200
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { ok: true, note: 'clean run' } }];"
+      },
+      "id": "clean",
+      "name": "Clean run",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1720,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "6am America/New_York": {
+      "main": [
+        [
+          {
+            "node": "Collect competitor UGC",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Collect competitor ads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect competitor UGC": {
+      "main": [
+        [
+          {
+            "node": "Wait for both",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect competitor ads": {
+      "main": [
+        [
+          {
+            "node": "Wait for both",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Wait for both": {
+      "main": [
+        [
+          {
+            "node": "Viral radar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Viral radar": {
+      "main": [
+        [
+          {
+            "node": "Day over day trends",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Day over day trends": {
+      "main": [
+        [
+          {
+            "node": "Update Google Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Google Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send radar to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send radar to Slack": {
+      "main": [
+        [
+          {
+            "node": "Build run summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build run summary": {
+      "main": [
+        [
+          {
+            "node": "Anything broken?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anything broken?": {
+      "main": [
+        [
+          {
+            "node": "Failure alert to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clean run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true
+  },
+  "pinData": {}
+}

@@ -1,0 +1,22 @@
+{
+	email {$CI_ACME_EMAIL}
+}
+
+{$CI_DOMAIN} {
+	encode gzip
+
+	# A collection stage can run for minutes. Without this Caddy would cut the
+	# connection at its own default and n8n would see a timeout on a run that
+	# actually succeeded.
+	reverse_proxy ci:8000 {
+		transport http {
+			read_timeout 20m
+			write_timeout 20m
+		}
+	}
+
+	log {
+		output stdout
+		format console
+	}
+}

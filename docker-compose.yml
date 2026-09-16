@@ -1,0 +1,59 @@
+# n8n schedules and chains. It holds no logic.
+#
+# n8n talks to the `ci` service over HTTP, not by shelling into it. The n8n image
+# has no docker CLI, so `docker compose exec` from inside it cannot work, and
+# mounting the docker socket to get one is a privilege escalation nobody wants on
+# a box running scheduled jobs. An HTTP endpoint is the boring correct answer.
+
+services:
+  ci:
+    build: .
+    image: creative-intelligence:latest
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - PYTHONPATH=/app/src
+      - CI_PORT=8000
+    command: ["serve", "--host", "0.0.0.0", "--port", "8000"]
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+      - ./prompts:/app/prompts
+      - ./credentials:/app/credentials:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=5).status==200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    # Not published to the host by default. Nothing outside the compose network
+    # needs to reach it, and it can trigger real spend.
+    expose:
+      - "8000"
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - GENERIC_TIMEZONE=${CI_TIMEZONE:-America/New_York}
+      - TZ=${CI_TIMEZONE:-America/New_York}
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_SECURE_COOKIE=false
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      # The workflows read these for the Slack alert nodes.
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN:-}
+      - SLACK_CHANNEL=${SLACK_CHANNEL:-#creative-radar}
+      - CI_API_TOKEN=${CI_API_TOKEN:-}
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./workflows/n8n:/workflows:ro
+    depends_on:
+      ci:
+        condition: service_healthy
+
+volumes:
+  n8n_data:

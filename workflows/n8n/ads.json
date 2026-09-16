@@ -1,0 +1,399 @@
+{
+  "name": "Competitor ads \u2014 daily",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "45 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "trigger",
+      "name": "6:45am New York",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "manual",
+        "includeOtherFields": false,
+        "assignments": {
+          "assignments": [
+            {
+              "id": "base",
+              "name": "baseUrl",
+              "value": "https://REPLACE-ME.example.com",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "id": "config",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1980,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.baseUrl }}/run/collect_meta_ads",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpTemplatedCustomAuth",
+        "options": {
+          "timeout": 900000,
+          "response": {
+            "response": {
+              "neverError": true
+            }
+          }
+        }
+      },
+      "id": "collect",
+      "name": "Collect competitor ads",
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CI service token"
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1760,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.baseUrl }}/run/radar_ads",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpTemplatedCustomAuth",
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "id": "score",
+      "name": "Score ads",
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CI service token"
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1540,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.baseUrl }}/run/sheets_push_ads",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpTemplatedCustomAuth",
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "id": "sheet",
+      "name": "Google Sheet ADS tabs",
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CI service token"
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1320,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.baseUrl }}/run/brief_input_ads",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpTemplatedCustomAuth",
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "id": "briefdata",
+      "name": "Today in brief form",
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CI service token"
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1100,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl }}/prompt/daily_brief_ads",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpTemplatedCustomAuth",
+        "options": {
+          "timeout": 900000
+        }
+      },
+      "id": "prompt",
+      "name": "Load prompt from repo",
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CI service token"
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1100,
+        480
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Load prompt from repo').first().json.prompt }}\n\nHere is today's data as JSON:\n\n{{ JSON.stringify($('Today in brief form').first().json.result, null, 1) }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "You write for one reader: a growth manager at an English learning app with a cat mascot, who has ten minutes. Be specific, be short, and never invent a number you were not given. Meta publishes no impressions or spend for US commercial ads, so never state or estimate reach, spend, CPM or ROAS."
+            }
+          ]
+        }
+      },
+      "id": "claude",
+      "name": "Claude writes the read",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        -880,
+        300
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "claude-sonnet-4-5",
+          "mode": "list",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {
+          "maxTokensToSample": 1500,
+          "temperature": 0.4
+        }
+      },
+      "id": "claude_model",
+      "name": "Claude Sonnet 4.5",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -880,
+        500
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Config').first().json.baseUrl }}/run/save_brief",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpTemplatedCustomAuth",
+        "options": {
+          "timeout": 900000
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ brief: $json.text || $json.output || \"\", source: \"claude/ads\" }) }}"
+      },
+      "id": "savebrief",
+      "name": "Brief back into the Sheet",
+      "credentials": {
+        "httpCustomAuth": {
+          "name": "CI service token"
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -660,
+        300
+      ],
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "jsCode": "const names = [\"Collect competitor ads\", \"Score ads\", \"Google Sheet ADS tabs\", \"Today in brief form\", \"Brief back into the Sheet\"];\nconst broken = [];\nconst partial = [];\nfor (const name of names) {\n  let r = null;\n  try { r = $(name).first().json; } catch (e) { broken.push(name + ': did not run'); continue; }\n  if (!r) { broken.push(name + ': no response'); continue; }\n  if (r.ok === false || r.status === 'failed') {\n    broken.push(name + ': ' + ((r.failures || [])[0] || r.error || 'failed'));\n  } else if (r.status === 'partial') { partial.push(name); }\n}\nif (broken.length) { throw new Error('Ads flow broke -> ' + broken.join(' | ')); }\nreturn [{ json: { flow: 'Ads flow', ok: true, partial, checked: names.length } }];"
+      },
+      "id": "health",
+      "name": "Fail loudly if a stage broke",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -440,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "6:45am New York": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Collect competitor ads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect competitor ads": {
+      "main": [
+        [
+          {
+            "node": "Score ads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score ads": {
+      "main": [
+        [
+          {
+            "node": "Google Sheet ADS tabs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheet ADS tabs": {
+      "main": [
+        [
+          {
+            "node": "Today in brief form",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Today in brief form": {
+      "main": [
+        [
+          {
+            "node": "Load prompt from repo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Load prompt from repo": {
+      "main": [
+        [
+          {
+            "node": "Claude writes the read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude writes the read": {
+      "main": [
+        [
+          {
+            "node": "Brief back into the Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Brief back into the Sheet": {
+      "main": [
+        [
+          {
+            "node": "Fail loudly if a stage broke",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Sonnet 4.5": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Claude writes the read",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/New_York",
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveExecutionProgress": true
+  },
+  "pinData": {}
+}

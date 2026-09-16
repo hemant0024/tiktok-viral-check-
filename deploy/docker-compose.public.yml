@@ -1,0 +1,60 @@
+# The ci service behind automatic HTTPS, for when n8n is not on the same machine.
+#
+# n8n Cloud runs on someone else's computer. It cannot reach http://ci:8000 on a
+# laptop, because that name only exists inside a local docker network. Either n8n
+# runs beside the service, or the service gets a real hostname. This is the second.
+#
+#   1. Point a DNS A record at the host, e.g. radar.yourdomain.com
+#   2. Put CI_DOMAIN, CI_ACME_EMAIL and a real CI_API_TOKEN in .env
+#   3. docker compose -f deploy/docker-compose.public.yml up -d
+#
+# Caddy gets the certificate itself, renews it, and is the only thing on the
+# public internet. The ci service is never published directly.
+
+services:
+  ci:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: creative-intelligence:latest
+    restart: unless-stopped
+    env_file: ../.env
+    environment:
+      - PYTHONPATH=/app/src
+    command: ["serve", "--host", "0.0.0.0", "--port", "8000"]
+    volumes:
+      - ../data:/app/data
+      - ../config:/app/config
+      - ../prompts:/app/prompts
+      - ../credentials:/app/credentials:ro
+    healthcheck:
+      test: ["CMD", "python", "-c",
+             "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/health',timeout=5).status==200 else 1)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 15s
+    # Deliberately not published. Caddy reaches it over the compose network.
+    expose:
+      - "8000"
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - CI_DOMAIN=${CI_DOMAIN:?set CI_DOMAIN in .env, e.g. radar.yourdomain.com}
+      - CI_ACME_EMAIL=${CI_ACME_EMAIL:?set CI_ACME_EMAIL in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      ci:
+        condition: service_healthy
+
+volumes:
+  caddy_data:
+  caddy_config:

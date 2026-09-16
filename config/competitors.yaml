@@ -1,0 +1,170 @@
+# The 18 competitors. Editable without code changes.
+#
+# `keywords` is what actually drives organic UGC discovery, so it matters more than
+# handles. Include common misspellings and how people actually say the name out loud.
+# `verified: false` means I could not confirm the handle and you should check it.
+
+defaults:
+  country: US
+  language: en
+
+competitors:
+  - name: Praktika AI
+    keywords: ["praktika", "praktika ai", "praktika app", "practika ai"]
+    hashtags: ["praktika", "praktikaai"]
+    domain: praktika.ai
+    meta_page_url: "https://www.facebook.com/praktika.ai"
+    tiktok: praktika.ai
+    instagram: praktika.ai
+    verified: false
+    tier: direct
+
+  - name: Parrot
+    keywords: ["parrot app english", "parrot language app", "parrot ai english"]
+    hashtags: ["parrotapp"]
+    domain: ""
+    verified: false
+    tier: direct
+    note: "Generic name, collides with unrelated apps. Needs your eyes before Phase 2."
+
+  - name: Pingo AI
+    keywords: ["pingo ai", "pingo app", "pingo english"]
+    hashtags: ["pingoai"]
+    domain: pingo.ai
+    tiktok: pingo.ai
+    verified: false
+    tier: direct
+
+  - name: Loora AI
+    keywords: ["loora", "loora ai", "loora english", "loora app"]
+    hashtags: ["loora", "looraai"]
+    domain: loora.ai
+    meta_page_url: "https://www.facebook.com/LooraAI"
+    tiktok: loora.ai
+    verified: true
+    note: "Confirmed live in the Meta Ad Library on 2026-09-10 as 'Loora: AI English Tutor'."
+    tier: direct
+
+  - name: Airlearn
+    keywords: ["airlearn", "air learn app", "airlearn app"]
+    hashtags: ["airlearn"]
+    domain: airlearn.com
+    tiktok: airlearn
+    verified: false
+    tier: direct
+
+  - name: Stimuler
+    keywords: ["stimuler", "stimuler app", "stimular english"]
+    hashtags: ["stimuler"]
+    domain: stimuler.com
+    tiktok: stimuler
+    verified: false
+    tier: direct
+
+  - name: Lingopanda
+    keywords: ["lingopanda", "lingo panda", "lingopanda app"]
+    hashtags: ["lingopanda"]
+    domain: ""
+    verified: false
+    tier: direct
+    note: "Could not confirm a US Meta presence. Check before Phase 2."
+
+  - name: Falou
+    keywords: ["falou", "falou app", "falou language"]
+    hashtags: ["falouapp"]
+    domain: falou.app
+    verified: false
+    tier: direct
+    note: "Name is a common Portuguese word, so keyword search will pull noise. Needs a tighter filter."
+
+  - name: Speak
+    keywords: ["speak app", "speak ai english", "speakeasy labs", "speak language app"]
+    hashtags: ["speakapp"]
+    domain: speak.com
+    meta_page_url: "https://www.facebook.com/speakeasylabs"
+    tiktok: speak
+    verified: false
+    tier: direct
+    note: "'Speak' alone is unusable as a keyword. Always search it paired."
+
+  - name: Babbel
+    keywords: ["babbel", "babble language app", "babbel app"]
+    hashtags: ["babbel"]
+    domain: babbel.com
+    meta_page_url: "https://www.facebook.com/babbel.languages"
+    tiktok: babbel
+    verified: false
+    tier: direct
+
+  - name: Learna
+    keywords: ["learna", "learna app", "learna english"]
+    hashtags: ["learna"]
+    domain: ""
+    verified: false
+    tier: direct
+    note: "Generic. Needs your eyes."
+
+  - name: Fluzy
+    keywords: ["fluzy", "fluzy app", "fluzy english"]
+    hashtags: ["fluzy"]
+    domain: ""
+    verified: false
+    tier: direct
+    note: "Could not confirm. Needs your eyes."
+
+  - name: Linguza
+    keywords: ["linguza", "linguza app", "linguza english tutor"]
+    hashtags: ["linguza"]
+    domain: ""
+    verified: true
+    note: >
+      Confirmed live in the Meta Ad Library on 2026-09-10 as 'Linguza: AI English Tutor'.
+      Five active video ads, oldest running since 3 June, all titled 'Try free now!'.
+      This is the strongest single winner signal found so far.
+    tier: direct
+
+  - name: Memrise
+    keywords: ["memrise", "memrise app", "memerise"]
+    hashtags: ["memrise"]
+    domain: memrise.com
+    meta_page_url: "https://www.facebook.com/memrise"
+    tiktok: memrise
+    verified: false
+    tier: direct
+
+  - name: ELSA Speak
+    keywords: ["elsa speak", "elsa app", "elsa english", "elsa pronunciation"]
+    hashtags: ["elsaspeak"]
+    domain: elsaspeak.com
+    meta_page_url: "https://www.facebook.com/elsaspeak"
+    tiktok: elsaspeak
+    verified: false
+    tier: direct
+
+  - name: Cambly
+    keywords: ["cambly", "cambly tutor", "cambly app"]
+    hashtags: ["cambly"]
+    domain: cambly.com
+    meta_page_url: "https://www.facebook.com/cambly"
+    tiktok: cambly
+    verified: false
+    tier: direct
+
+  - name: Preply
+    keywords: ["preply", "preply tutor", "preply app"]
+    hashtags: ["preply"]
+    domain: preply.com
+    meta_page_url: "https://www.facebook.com/preply"
+    tiktok: preply
+    verified: false
+    tier: direct
+
+# Not competitors. Watched because their mechanisms travel.
+adjacent:
+  - name: Jumpspeak
+    keywords: ["jumpspeak", "jump speak app"]
+    verified: true
+    note: >
+      Found running a direct comparison attack ad in the US on 2026-09-10.
+      Not on the list but clearly in the fight.
+    tier: adjacent

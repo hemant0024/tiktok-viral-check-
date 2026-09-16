@@ -1,0 +1,82 @@
+# The ONLY place product, mascot, market and audience facts live.
+# Nothing in src/ may assume any of this. Spec section 13.
+
+market:
+  country: "US"
+  country_name: "United States"
+  language: "en-US"
+  timezone: "America/New_York"
+  date_format: "%B %-d, %Y"
+  currency: "USD"
+  # Non-US content is a secondary signal only and must be tagged with its country.
+  allow_global_signal: true
+  global_signal_weight: 0.6
+
+product:
+  name: "the app"
+  category: "English learning app"
+  one_liner: "Practice speaking English with an AI you can actually talk to."
+  positioning:
+    - conversational English
+    - practical speaking
+    - confidence
+    - AI-powered practice
+  proof_points:
+    - real spoken conversations, not multiple choice
+    - corrects pronunciation in the moment
+    - works in short daily sessions
+  # Claims the quality gate will reject if a hook implies them.
+  forbidden_claims:
+    - guaranteed fluency
+    - fluent in 7 days
+    - replaces a human teacher
+    - certified or accredited
+    - job or visa outcomes
+
+mascot:
+  type: "cat"
+  name: "the cat"
+  role: "main character"
+  personality:
+    - expressive
+    - funny
+    - encouraging
+    - curious
+    - slightly chaotic but lovable
+  # Spec section 15. Rotation is enforced in Python, not requested in the prompt.
+  roles:
+    - cat reacts
+    - cat teaches
+    - cat makes a mistake
+    - cat gets embarrassed
+    - cat challenges the user
+    - cat misunderstands something
+    - cat demonstrates the product
+    - cat breaks the fourth wall
+    - cat acts as the learner
+    - cat acts as the teacher
+    - cat reacts to user pronunciation
+    - cat celebrates progress
+  visual_treatments:
+    - 2D flat animation
+    - live action cat with animated overlay
+    - puppet / plush
+    - screen-recording with cat corner cam
+    - text-to-video stylised
+
+audience:
+  primary:
+    - young adults
+    - English learners
+    - people who understand English but struggle to speak
+  secondary:
+    - immigrants and new arrivals preparing for work conversations
+    - students preparing for interviews
+  pains:
+    - freezing up mid sentence
+    - understanding everything but not being able to reply
+    - embarrassment about accent
+    - years of study with no speaking practice
+  cultural_notes:
+    - hooks, slang and humour must feel native to US social media
+    - avoid references that only land outside the US
