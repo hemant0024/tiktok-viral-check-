@@ -3,6 +3,19 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# macOS refuses to compile anything until the Xcode licence is accepted, and the
+# failure lands in the middle of a brew install where it reads like a broken
+# formula rather than a one line fix.
+if [ "$(uname)" = "Darwin" ] && /usr/bin/xcrun --version 2>&1 | grep -qi "license"; then
+  echo
+  echo "macOS needs the Xcode licence accepted before anything will build."
+  echo "Run this, then start this script again:"
+  echo
+  echo "  sudo xcodebuild -license accept"
+  echo
+  exit 1
+fi
+
 echo "ffmpeg and tesseract"
 if command -v brew >/dev/null; then
   brew list ffmpeg    >/dev/null 2>&1 || brew install ffmpeg
