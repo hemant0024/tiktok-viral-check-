@@ -28,6 +28,8 @@ fi
 echo "python environment"
 ci_venv_ready
 
+ci_project_deps
+
 echo "python packages"
 "$PIP" install -q --upgrade pip
 "$PIP" install -q yt-dlp faster-whisper

@@ -41,3 +41,11 @@ ci_venv_ready() {
   PIP="$VENV/bin/pip"
   export VENV PY PIP
 }
+
+ci_project_deps() {
+  if ! "$PY" -c "import yaml, pydantic" >/dev/null 2>&1; then
+    echo "  installing the project's dependencies (first run only)"
+    "$PIP" install -q --upgrade pip
+    "$PIP" install -q -e . 2>/dev/null || "$PIP" install -q -r requirements.txt
+  fi
+}

@@ -12,11 +12,7 @@ PORT="${1:-8787}"
 . tools/_venv.sh
 ci_venv_ready
 
-if ! "$PY" -c "import yaml, pydantic" >/dev/null 2>&1; then
-  echo "Installing dependencies (first run only)"
-  "$PIP" install -q --upgrade pip
-  "$PIP" install -q -e . 2>/dev/null || "$PIP" install -q -r requirements.txt
-fi
+ci_project_deps
 
 export PYTHONPATH="$PWD/src"
 URL="http://127.0.0.1:$PORT"
