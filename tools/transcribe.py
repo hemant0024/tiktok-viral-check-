@@ -223,12 +223,19 @@ def to_markdown(row: dict, data: dict) -> str:
          f"{row.get('competitor','')} · {data['duration']:.0f}s · "
          f"{int(row.get('views') or 0):,} views · language {data.get('language') or 'unknown'}",
          "", "| Time | On screen | Said |", "|---|---|---|"]
-    marks = sorted({round(s["t"], 1) for s in data["scenes"]}
-                   | {round(s["start"], 1) for s in data["segments"]})
-    for t in marks:
-        on = next((s["ocr"] for s in data["scenes"] if abs(s["t"] - t) < 0.25), "")
-        said = " ".join(s["text"] for s in data["segments"]
-                        if abs(s["start"] - t) < 0.25)
+    # A cut and the line spoken over it are one moment. Rounding each to a tenth
+    # of a second printed the same beat twice in the first file this produced.
+    raw = sorted([s["t"] for s in data["scenes"]] + [s["start"] for s in data["segments"]])
+    marks: list[float] = []
+    for m in raw:
+        if not marks or m - marks[-1] > 1.0:
+            marks.append(m)
+    for i, t in enumerate(marks):
+        upper = marks[i + 1] if i + 1 < len(marks) else float("inf")
+        def inside(v: float) -> bool:
+            return t - 0.25 <= v < upper - 0.25
+        on = " / ".join(s["ocr"] for s in data["scenes"] if inside(s["t"]) and s["ocr"])
+        said = " ".join(s["text"] for s in data["segments"] if inside(s["start"]))
         if not on and not said:
             continue
         L.append(f"| {clock(t)} | {on.replace('|','/')} | {said.replace('|','/')} |")
