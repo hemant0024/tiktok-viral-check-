@@ -1590,6 +1590,22 @@ const BITS = [
  caption:"picked up the phone without writing down what to say first"},
 ];
 
+/* Written from the actual video, once its transcript exists. Keyed by content
+   id, and it wins over the generic bank. One entry per video we have watched. */
+const REBUILDS = {
+"7683568857994366230": {angle:"comedy",
+  hook:"How do you say 'you're being dramatic' in English?",
+  setup:"The phrase sits on screen in big plain text. No face, no intro.",
+  cat:"You're being dramatic.",
+  cat2:"Again, and this time believe it.",
+  close:"Both lines on screen together. Hard cut.",
+  caption:"sending this to one person in particular",
+  note:"Their video is a translation gag: an English phrase on screen, the German "
+       + "said out loud, both languages together at the payoff. Seven and a half "
+       + "seconds, no setup, no call to action. The lesson is the vehicle, the joke "
+       + "is the phrase. It is a series, not a one off."},
+};
+
 const TAGSETS = [
   "#learnenglish #englishspeaking #speakenglish #aitutor #fyp",
   "#learnenglish #englishpractice #esl #speakingpractice #fyp",
@@ -1632,7 +1648,8 @@ function buildScript(r){
   const seed=r.content_id||r.url||r.creator;
   const angle=angleOf(r), shape=readShape(r);
   const idx=S.assign?.[r.content_id||r.url];
-  const bit=(idx!=null&&BITS[idx]) ? BITS[idx]
+  const bit=REBUILDS[r.content_id] ? REBUILDS[r.content_id]
+    : (idx!=null&&BITS[idx]) ? BITS[idx]
     : pick(BITS.filter(b=>b.angle===angle).length?BITS.filter(b=>b.angle===angle):BITS,seed,0);
   const tags=pick(TAGSETS,seed,5);
   const t=f=>clock(Math.round(d*f));
@@ -1673,7 +1690,8 @@ function buildScript(r){
       {t:t(.93), who:"Close",  line:bit.close},
       {t:clock(d),who:"Note",  line:d+" seconds is long. Nothing over 45 seconds worked in this run. Cut it to 30 if it drags."}];
   }
-  return {hook:bit.hook, angle, shape, seconds:d, beats, caption:bit.caption, tags};
+  return {hook:bit.hook, angle, shape, seconds:d, beats, caption:bit.caption, tags,
+          fromReal:!!REBUILDS[r.content_id], note:bit.note||""};
 }
 
 function buildBrief(r){
@@ -1852,7 +1870,11 @@ function openScript(r){
     if(t){
       // We have their script now, so the warning above ours would contradict it.
       const w=$("#sp-body").querySelector(".sp-warn");
-      if(w) w.innerHTML='<b>Below is our idea, not theirs.</b> Their actual script is at the top.';
+      const sc=buildScript(r);
+      if(w) w.innerHTML = sc.fromReal
+        ? `<b>Ours, rebuilt from theirs.</b> ${esc(sc.note)}`
+        : '<b>Below is our idea, not theirs.</b> Their actual script is at the top, and ours was written before anyone saw it.';
+      if(sc.fromReal) w.style.borderColor="var(--live)";
       $("#sp-note").textContent="Their script, and ours underneath.";
     }
   });
