@@ -1593,6 +1593,24 @@ const BITS = [
 /* Written from the actual video, once its transcript exists. Keyed by content
    id, and it wins over the generic bank. One entry per video we have watched. */
 const REBUILDS = {
+/* Written after watching the real transcripts. The pattern across the winners is
+   one thing: talk to the AI like a person and let it react like one. The video
+   that flopped hardest (101 views, zero likes) is the only one where the AI is
+   described as a product instead of behaving like a character. */
+
+"7683950710215560480": {angle:"comedy",
+  hook:"I told my AI tutor I was eating a salad.",
+  setup:"Learner is very obviously eating crisps. Answers with a full mouth.",
+  cat:"That salad is extremely crunchy.",
+  cat2:"I can hear the bag. I can hear the bag right now.",
+  close:"Caught by a cat. Over audio. About lettuce.",
+  caption:"lied to my ai tutor about a salad and it heard the bag",
+  note:"Their BREAKING OUT video, 37s in Arabic: the AI asks what she is eating, "
+     + "she says a salad, it keeps noting how crunchy the salad is, then tells her "
+     + "it can hear her chewing crisps. The joke is the AI catching a lie. Praktika "
+     + "is running this exact format in Italian too, with a caption that translates "
+     + "as 'I am playing a prank on my AI'."},
+
 "7683568857994366230": {angle:"comedy",
   hook:"How do you say 'you're being dramatic' in English?",
   setup:"The phrase sits on screen in big plain text. No face, no intro.",
@@ -1600,10 +1618,55 @@ const REBUILDS = {
   cat2:"Again, and this time believe it.",
   close:"Both lines on screen together. Hard cut.",
   caption:"sending this to one person in particular",
-  note:"Their video is a translation gag: an English phrase on screen, the German "
-       + "said out loud, both languages together at the payoff. Seven and a half "
-       + "seconds, no setup, no call to action. The lesson is the vehicle, the joke "
-       + "is the phrase. It is a series, not a one off."},
+  note:"A translation gag. 'You're a rat' on screen, the German said out loud, both "
+     + "languages together at the payoff. 7.5 seconds, no setup, no call to action. "
+     + "Pick a phrase you would actually send to somebody."},
+
+"7683557786726206721": {angle:"lifechange",
+  hook:"I told my AI tutor I was moving cities.",
+  setup:"Casual, mid conversation. Drops it in like it is nothing.",
+  cat:"Wait. You said you liked it here.",
+  cat2:"No, it is fine. I am happy for you. Genuinely.",
+  close:"Learner, to camera: it is a cat. Why do I feel bad.",
+  caption:"my ai tutor took it personally and now i feel terrible",
+  note:"Pingo AI, 23s in Japanese. She says she moved to a log house in Nagano, the "
+     + "AI says wait, you moved? I thought you liked Sendai, and ends on 'that is "
+     + "sad'. The AI has feelings and that is the entire video."},
+
+"7683689556448709910": {angle:"proof",
+  hook:"The tomatoes is fresh.",
+  setup:"Said wrong, confidently, mid chop. Kitchen, phone propped up.",
+  cat:"The tomatoes ARE fresh.",
+  cat2:"Say it again. Louder. Like you meant it the first time.",
+  close:"Learner says it clean. Cat: better.",
+  caption:"corrected by a cat while holding a knife",
+  note:"Praktika, 29s in Russian. She says 'i'm cutting tomatoes', the AI says "
+     + "'repeat, queen', she says 'they is fresh' and it corrects her to 'are'. "
+     + "The correction lands inside a real conversation, not a lesson."},
+
+"7683776029458042130": {angle:"comedy",
+  hook:"How do you say 'worms' in English?",
+  setup:"Eating something questionable at one in the morning.",
+  cat:"Worms. Why.",
+  cat2:"It is one in the morning. I cannot get past the worms.",
+  close:"Learner, chewing: it is a texture thing.",
+  caption:"my ai tutor could not move on from the worms",
+  note:"Praktika, 23s in Spanish. The AI asks what she is eating at this hour, she "
+     + "asks how to say 'gusano', and it will not let it go. Same family as the "
+     + "salad one: the AI reacts like a person to something absurd."},
+
+"7683574316729994509": {angle:"problem",
+  hook:"Do not make this video.",
+  setup:"Straight to camera. This one is a warning, not a script to shoot.",
+  cat:"",
+  cat2:"",
+  close:"",
+  caption:"",
+  note:"101 views and not one like, comment, share or save in 40 hours. It is 37 "
+     + "seconds of clean brand voiceover: 'I am Laura, your AI English tutor, you "
+     + "can practise with me anytime, anywhere'. Every video that worked has the AI "
+     + "behaving like a character. This one describes it like a product. That is "
+     + "the whole difference, and it is the clearest lesson in the run."},
 };
 
 const TAGSETS = [
