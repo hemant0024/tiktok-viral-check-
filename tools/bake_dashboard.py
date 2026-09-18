@@ -16,11 +16,18 @@ repo = get_repository(settings)
 
 baked = {
     "/api/health": api.health(settings, repo),
+    "/api/transcripts": api.transcript_index(settings),
     "/api/config": api.config(settings),
     "/api/cost":   api.cost(settings),
     "/api/facets": api.facets(settings, repo),
     "/api/rows":   api.rows(settings, repo, limit=5000),
 }
+
+# Every transcript has to travel with the file. Without them the offline copy
+# asks a server that is not there, the fetch fails, and every row claims we have
+# never watched the video even when we have.
+for cid in api.transcript_index(settings)["ids"]:
+    baked[f"/api/transcript/{cid}"] = api.transcript(cid, settings)
 
 page = pathlib.Path("src/ci/dashboard/page.html").read_text()
 
@@ -89,6 +96,10 @@ window.__BAKED_AT__ = %s;
     }
     if(path === "/api/run") return reply(200, {jobs: [], running: null, label: null,
       elapsed: null, steps: [], last: null, history: []});
+    // An unbaked transcript means we never made one, not that the lookup broke.
+    // Check the baked ones FIRST, or every transcript we do have reads as missing.
+    if(path.startsWith("/api/transcript/") && !window.__BAKED__[path])
+      return reply(200, {found: false});
     if(path === "/api/rows") return reply(200, filterRows(url));
     if(window.__BAKED__[path]) return reply(200, window.__BAKED__[path]);
     if(typeof real === "function") return real.apply(this, arguments);
