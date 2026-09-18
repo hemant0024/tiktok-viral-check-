@@ -86,6 +86,8 @@ a{color:inherit}
 .chipbar.stale .dot{background:var(--warn);box-shadow:0 0 0 3px color-mix(in srgb,var(--warn) 18%,transparent)}
 .chipbar.none .dot{background:var(--bad);box-shadow:0 0 0 3px color-mix(in srgb,var(--bad) 18%,transparent)}
 .chipbar.busy .dot{animation:blip 1s ease-in-out infinite}
+button.chipbar{cursor:pointer}
+button.chipbar:hover{border-color:var(--line-3)}
 @keyframes blip{50%{opacity:.25;transform:scale(.7)}}
 
 .btn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 13px;border-radius:9px;
@@ -404,6 +406,7 @@ tr.open .caret svg{transform:rotate(90deg)}
   <header class="top">
     <div class="brand"><span class="dish"></span>Radar<span class="sub">competitor viral radar</span></div>
     <div id="state" class="chipbar"><span class="dot"></span><span id="state-text">loading</span></div>
+    <button id="tstate" class="chipbar" title="Their real scripts, not ours"><span class="dot"></span><span id="tstate-text">&nbsp;</span></button>
     <div class="spacer"></div>
     <button class="btn" id="b-run">
       <svg viewBox="0 0 24 24"><path d="M5 3.5l14 8.5-14 8.5z"/></svg>Run<span style="color:var(--faint)">▾</span>
@@ -914,6 +917,14 @@ function renderState(){
   if(days!=null && days>=1) el.classList.add("stale");
   txt.textContent=`${n} videos · last collected ${when?when.toLocaleDateString(undefined,{day:"numeric",month:"short"}):"unknown"}`
     + (days>=1?` · ${days} day${days===1?"":"s"} ago`:"");
+
+  const tel=$("#tstate"), got=h.transcripts||0;
+  tel.classList.remove("stale","none");
+  tel.classList.add(got===0?"none":(got<n?"stale":""));
+  $("#tstate-text").textContent = got===0
+    ? `no real scripts yet · ${n} to fetch`
+    : `${got} of ${n} real scripts`;
+  tel.title = got<n ? "Click to fetch the competitors' own scripts" : "Their own scripts, from the videos";
 }
 
 /* ---------- running jobs ---------- */
@@ -924,6 +935,7 @@ function openPop(){
   pop.style.left=Math.max(12,Math.min(r.left, innerWidth-pop.offsetWidth-12))+"px";
   pop.classList.add("on");
 }
+$("#tstate").onclick=()=>{ $("#b-run").click(); };
 $("#b-run").onclick=async()=>{
   if(pop.classList.contains("on")) return pop.classList.remove("on");
   openPop(); await refreshRun();
@@ -942,6 +954,8 @@ async function refreshRun(){
     if(!S.health) return "";
     if(j.needs==="apify"  && !S.health.apify_token)  return "Needs APIFY_TOKEN in a .env file at the top of the project.";
     if(j.needs==="google" && !S.health.sheets_ready) return "Needs the Google service account and sheet id set up first.";
+    if(j.needs==="transcribe" && S.health.transcribe && !S.health.transcribe.ready)
+      return "Missing " + S.health.transcribe.missing.join(", ") + ". Run ./tools/setup_transcribe.sh once.";
     return "";
   };
   $("#pop-body").innerHTML = st.jobs.map(j=>{

@@ -436,6 +436,17 @@ def transcript(content_id: str, settings=None) -> dict[str, Any]:
         return {"found": False, "error": str(exc)}
 
 
+def transcribe_ready() -> dict[str, Any]:
+    """Whether tools/transcribe.py has what it needs on this machine."""
+    import importlib.util
+    import shutil
+    missing = [t for t in ("yt-dlp", "ffmpeg") if shutil.which(t) is None]
+    if importlib.util.find_spec("faster_whisper") is None:
+        missing.append("faster-whisper")
+    return {"ready": not missing, "missing": missing,
+            "ocr": shutil.which("tesseract") is not None}
+
+
 def transcript_index(settings=None) -> dict[str, Any]:
     settings = settings or get_settings()
     folder = Path(settings.local_data_dir) / "transcripts"
@@ -480,6 +491,7 @@ def health(settings=None, repo=None) -> dict[str, Any]:
         "env_file": env.exists(),
         "sheets_ready": bool(settings.google_sheet_id and settings.google_service_account_json),
         "transcripts": transcript_index(settings)["count"],
+        "transcribe": transcribe_ready(),
     }
     state["diagnosis"] = _diagnose(state)
     return state

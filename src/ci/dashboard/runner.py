@@ -54,6 +54,11 @@ def catalogue() -> list[dict[str, Any]]:
         {"key": "collect_ads", "label": "Collect competitor ads, then score",
          "blurb": "Pulls the Meta ad library for the competitor pages, then scores them.",
          "network": True, "needs": "apify", "cost": "about $0.05 per sweep"},
+        {"key": "transcripts", "label": "Get their real scripts",
+         "blurb": "Downloads the videos that crossed BREAKING OUT or DAY TWO, reads "
+                  "the speech and the text on screen, and puts the competitor's own "
+                  "script on the row. Needs a VPN: Indian ISPs block TikTok.",
+         "network": True, "needs": "transcribe", "cost": "free"},
         {"key": "sheets", "label": "Push to Google Sheet",
          "blurb": "Writes the current radar to the shared sheet.",
          "network": True, "needs": "google", "cost": "free"},
@@ -88,6 +93,9 @@ def _plan(key: str, settings: Settings) -> list[tuple[str, Callable[[], dict]]]:
              lambda: S.stage_collect(repo, settings, ["meta_ads"])),
             ("Scoring the ads", lambda: S.stage_radar(repo, settings, kind="ads")),
         ],
+        "transcripts": [
+            ("Downloading and reading the videos", lambda: _transcribe(settings)),
+        ],
         "sheets": [
             ("Writing the Google Sheet", lambda: S.stage_sheets_push(repo, settings)),
         ],
@@ -95,6 +103,37 @@ def _plan(key: str, settings: Settings) -> list[tuple[str, Callable[[], dict]]]:
     if key not in plans:
         raise KeyError(key)
     return plans[key]
+
+
+def _transcribe(settings: Settings, tiers: tuple[str, ...] = ("BREAKING OUT", "DAY TWO")) -> dict:
+    """Shell out to tools/transcribe.py.
+
+    A separate process on purpose: it pulls in whisper and ffmpeg, which have no
+    business being imported into a dashboard that has to stay responsive.
+    """
+    import subprocess
+    import sys
+
+    from ci.config import REPO_ROOT
+
+    script = REPO_ROOT / "tools" / "transcribe.py"
+    if not script.exists():
+        raise RuntimeError("tools/transcribe.py is missing")
+    cmd = [sys.executable, str(script), "--tier", *tiers]
+    proc = subprocess.run(cmd, capture_output=True, text=True,
+                          cwd=str(REPO_ROOT), timeout=3600)
+    tail = (proc.stdout or "")[-4000:]
+    done = failed = 0
+    for line in tail.splitlines():
+        if line.strip().endswith("failed.") and " done, " in line:
+            try:
+                done = int(line.split(" done")[0].strip())
+                failed = int(line.split(" done, ")[1].split(" ")[0])
+            except (ValueError, IndexError):
+                pass
+    if proc.returncode != 0 and not done:
+        raise RuntimeError((proc.stderr or tail or "transcribe failed").strip()[-400:])
+    return {"transcribed": done, "failed": failed, "output": tail[-1200:]}
 
 
 def _hint(key: str, results: list[dict], error: str | None) -> str:
@@ -111,11 +150,24 @@ def _hint(key: str, results: list[dict], error: str | None) -> str:
     if "402" in blob or "insufficient" in blob or "credit" in blob or "usage limit" in blob:
         return ("Apify has no credit left, so the scrape could not run. Top the "
                 "account up and run this again.")
+    if "could not reach tiktok" in blob or "resolve" in blob:
+        return ("TikTok could not be reached. Most Indian ISPs block it, and this "
+                "downloads straight from TikTok. Turn a VPN on and run it again.")
+    if "is not installed" in blob or "no module named" in blob:
+        return ("The transcriber is missing a tool. Run ./tools/setup_transcribe.sh "
+                "once, then try again.")
     if "throttl" in blob:
         return ("Apify throttled the search. Wait a few minutes and run it again, "
                 "or switch to the paid actor in Settings.")
     if error:
         return ""
+    if key == "transcripts":
+        got = _count(results, "transcribed")
+        if got == 0 and not error:
+            return ("Nothing was transcribed. Usually that is TikTok being "
+                    "unreachable, so check the VPN.")
+        if got:
+            return ""
     scored = _count(results, "scored")
     if key.startswith("collect") or key == "watch":
         collected = _count(results, "collected") + _count(results, "new") + _count(results, "polled")
@@ -201,7 +253,7 @@ def _summarise(out: dict) -> str:
     if isinstance(summary, dict) and isinstance(summary.get("counts"), dict):
         counts.update(summary["counts"])
     counts.update({k: v for k, v in out.items() if isinstance(v, int)})
-    order = ("collected", "new", "attributed", "scored", "on_feed", "hot", "kept",
+    order = ("transcribed", "collected", "new", "attributed", "scored", "on_feed", "hot", "kept",
              "dropped", "tracked", "polled", "checked", "rows", "pushed", "skipped")
     bits = [f"{k.replace('_', ' ')} {counts[k]}" for k in order if k in counts]
     bits += [f"{k.replace('_', ' ')} {v}" for k, v in counts.items()
