@@ -3,6 +3,8 @@
 __pycache__/
 *.pyc
 .env
+.env.*
+.env.local
 data/
 !data/.gitkeep
 .pytest_cache/
@@ -15,3 +17,4 @@ credentials/
 radar-dashboard.html
 Claude outputs/
 .DS_Store
+.vercel
