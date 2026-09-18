@@ -418,6 +418,31 @@ def preview(changes: dict[str, Any], settings=None, repo=None) -> dict[str, Any]
             "moved": moved[:40], "moved_total": len(moved)}
 
 
+def transcript(content_id: str, settings=None) -> dict[str, Any]:
+    """What is actually in the video, when tools/transcribe.py has been run on it.
+
+    Absent for most videos, and that absence is the honest answer: without it the
+    dashboard only has an idea we wrote, never the competitor's own script.
+    """
+    settings = settings or get_settings()
+    safe = "".join(c for c in str(content_id) if c.isalnum() or c in "-_")
+    path = Path(settings.local_data_dir) / "transcripts" / f"{safe}.json"
+    if not safe or not path.exists():
+        return {"found": False}
+    try:
+        import json
+        return {"found": True, **json.loads(path.read_text())}
+    except Exception as exc:  # noqa: BLE001
+        return {"found": False, "error": str(exc)}
+
+
+def transcript_index(settings=None) -> dict[str, Any]:
+    settings = settings or get_settings()
+    folder = Path(settings.local_data_dir) / "transcripts"
+    ids = sorted(f.stem for f in folder.glob("*.json")) if folder.exists() else []
+    return {"ids": ids, "count": len(ids)}
+
+
 def health(settings=None, repo=None) -> dict[str, Any]:
     """Where the data is, how much of it there is, and what is missing.
 
@@ -454,6 +479,7 @@ def health(settings=None, repo=None) -> dict[str, Any]:
         "apify_token": bool(settings.apify_token),
         "env_file": env.exists(),
         "sheets_ready": bool(settings.google_sheet_id and settings.google_service_account_json),
+        "transcripts": transcript_index(settings)["count"],
     }
     state["diagnosis"] = _diagnose(state)
     return state

@@ -48,6 +48,10 @@ class Handler(BaseHTTPRequestHandler):
             return self._send(200, api.config())
         if url.path == "/api/cost":
             return self._send(200, api.cost())
+        if url.path == "/api/transcripts":
+            return self._send(200, api.transcript_index())
+        if url.path.startswith("/api/transcript/"):
+            return self._send(200, api.transcript(url.path.rsplit("/", 1)[-1]))
         if url.path == "/api/health":
             return self._send(200, api.health())
         if url.path == "/api/run":

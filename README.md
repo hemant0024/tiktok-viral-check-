@@ -189,3 +189,7 @@ src/ci/
 
 Adding a source means writing one adapter with a `fetch()` method. Nothing downstream
 changes. Moving off Sheets means writing one repository adapter. Same deal.
+
+## Scripts
+
+See [docs/SCRIPTS.md](docs/SCRIPTS.md).

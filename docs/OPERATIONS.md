@@ -185,6 +185,36 @@ the sheet being the endpoint: everything essential has already landed.
 `OPENAI_API_KEY` is only needed for the hook analysis and generation stages. The radar,
 trends and sheet all run without it.
 
+## Getting the competitor's actual script
+
+The radar stores numbers and captions. It has never stored what happens inside a
+video, so anything the dashboard shows under "Our idea" is written by us, not
+lifted from them. Two ways to get the real thing.
+
+**Free, on this machine.**
+
+```bash
+./tools/setup_transcribe.sh            # once: ffmpeg, tesseract, yt-dlp, whisper
+python tools/transcribe.py --top 3     # the three best scoring videos
+python tools/transcribe.py --tier "BREAKING OUT" "DAY TWO"
+python tools/transcribe.py --url https://www.tiktok.com/@someone/video/123
+```
+
+It downloads the video, uses TikTok's own captions when they exist and Whisper
+when they do not, finds the cuts with ffmpeg, and reads the text burned into a
+frame from each one. Output lands in `data/transcripts/` as JSON and markdown,
+and the dashboard picks it up automatically: open a row's script and the real
+one appears above ours, tagged "From the video".
+
+TikTok is blocked by most Indian ISPs and this downloads straight from TikTok,
+so it needs a VPN or a machine outside India.
+
+**Paid, through Apify.** The same scraper we already use has two switches:
+`downloadSubtitlesOptions: TRANSCRIBE_ALL_VIDEOS` and `aiVideoDescription`, which
+gives a scene by scene account of what is seen and heard. About 9 cents a video,
+so $1.11 for the twelve that crossed BREAKING OUT or DAY TWO, $5.70 for all 52.
+No VPN needed. It needs credit on the Apify account.
+
 ## The local dashboard
 
 ```bash

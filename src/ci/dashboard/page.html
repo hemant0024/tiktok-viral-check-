@@ -223,6 +223,72 @@ tr.detail td{padding:0;background:var(--bg-2);border-bottom:1px solid var(--line
 .kv{display:flex;justify-content:space-between;gap:10px;font-size:12px;padding:3px 0;border-bottom:1px dashed var(--line)}
 .kv span{color:var(--faint)} .kv b{font-weight:600}
 .expand{width:30px}
+.scriptcell{max-width:190px}
+.hookbtn{display:block;width:100%;text-align:left;padding:6px 8px;border-radius:7px;
+  border:1px solid transparent;transition:.12s;line-height:1.35}
+.hookbtn:hover{border-color:var(--line-2);background:var(--card-2)}
+.hookbtn .hk{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+  font-size:11.5px;color:var(--mid)}
+.hookbtn .go::before{content:"OURS · "}
+.hookbtn .go{display:block;margin-top:3px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  font-weight:700;color:var(--accent);opacity:0;transition:opacity .12s}
+tr:hover .hookbtn .go{opacity:1}
+#scriptpane{position:fixed;top:0;right:0;bottom:0;width:520px;max-width:100vw;z-index:60;
+  background:var(--bg-2);border-left:1px solid var(--line-2);transform:translateX(100%);
+  transition:transform .22s cubic-bezier(.3,.8,.3,1);display:flex;flex-direction:column}
+#scriptpane.open{transform:none}
+.sp-head{display:flex;gap:12px;align-items:flex-start;padding:16px;border-bottom:1px solid var(--line)}
+.sp-head h2{margin:4px 0 0;font-size:16px;font-weight:650;letter-spacing:-.015em;line-height:1.3}
+.sp-sub{font-size:11.5px;color:var(--faint);margin-top:5px}
+.sp-body{flex:1;overflow-y:auto;padding:16px}
+.sp-foot{display:flex;gap:8px;align-items:center;padding:12px 16px;border-top:1px solid var(--line);
+  background:var(--card)}
+.realwrap{margin-bottom:16px}
+.realbadge{display:inline-flex;align-items:center;gap:7px;font-size:10px;letter-spacing:.09em;
+  text-transform:uppercase;font-weight:700;padding:4px 9px;border-radius:5px;margin-bottom:10px;
+  background:color-mix(in srgb,var(--live) 16%,transparent);color:var(--live);
+  border:1px solid color-mix(in srgb,var(--live) 40%,transparent)}
+.realbadge.missing{background:transparent;color:var(--faint);border-color:var(--line-2)}
+.realwrap code{display:inline-block;margin:6px 0;padding:3px 7px;border-radius:4px;
+  background:var(--raise);font-size:11.5px;word-break:break-all}
+.sp-ref{display:block;font-size:11.5px;color:var(--accent);margin-bottom:14px;word-break:break-all}
+.sp-read{font-size:12.5px;color:var(--mid);line-height:1.6;margin:0 0 14px;
+  padding:11px 13px;background:var(--card);border:1px solid var(--line);border-radius:9px}
+.sp-read b{color:var(--ink)}
+.beatrow{display:flex;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:13px;
+  line-height:1.5}
+.beatrow .t{flex:0 0 42px;color:var(--accent);font-weight:650;font-variant-numeric:tabular-nums;
+  font-size:12px;padding-top:1px}
+.beatrow .w{flex:0 0 62px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--faint);font-weight:700;padding-top:3px}
+.beatrow .l{flex:1;color:var(--ink)}
+.beatrow.is-cat .l{color:var(--t-interesting)}
+.beatrow.is-note .l{color:var(--warn);font-size:12px}
+.sp-cap{margin-top:16px;padding:12px 13px;border:1px dashed var(--line-2);border-radius:9px}
+.sp-cap .eyebrow{margin-bottom:6px}
+.sp-cap .c{font-size:13px}
+.sp-cap .tags{display:block;margin-top:6px;font-size:12px;color:var(--accent);word-break:break-word}
+.bp-cap{margin-top:11px;font-size:12px;color:var(--mid);line-height:1.5}
+.bp-cap b{color:var(--ink);font-weight:600;margin-right:6px}
+.bp-cap .tags{color:var(--accent)}
+ol.beats li .bw{flex:0 0 58px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--faint);font-weight:700;padding-top:2px}
+.briefpane{margin:0 18px 16px;padding:14px 16px;border:1px solid var(--line-2);border-radius:10px;
+  background:var(--card)}
+.bp-head{display:flex;align-items:center;gap:10px;margin-bottom:9px;flex-wrap:wrap}
+.bp-head .eyebrow{color:var(--accent)}
+.bp-shape{font-size:11.5px;color:var(--faint);flex:1;min-width:120px}
+.bp-head .btn{height:26px;padding:0 10px;font-size:11.5px}
+.bp-why{margin:0 0 8px;font-size:12.5px;color:var(--mid);line-height:1.55;max-width:74ch}
+.bp-why b{color:var(--ink);font-weight:600}
+ol.beats{margin:10px 0 0;padding:0;list-style:none;counter-reset:b}
+ol.beats li{display:flex;gap:10px;font-size:12.5px;color:var(--mid);padding:5px 0;
+  border-top:1px solid var(--line);line-height:1.5}
+ol.beats li .bt{flex:0 0 46px;color:var(--accent);font-weight:600;font-variant-numeric:tabular-nums}
+.bp-foot{margin-top:11px;font-size:11px;color:var(--ghost);line-height:1.5}
+.btn.dl{height:27px;padding:0 9px;font-size:11.5px;gap:5px;opacity:.55;transition:opacity .12s}
+tr:hover .btn.dl{opacity:1}
+.btn.dl svg{width:12px;height:12px}
 .caret{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;color:var(--faint);transition:.14s}
 .caret:hover{background:var(--raise);color:var(--ink)}
 .caret svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;transition:transform .16s}
@@ -348,6 +414,9 @@ tr.open .caret svg{transform:rotate(90deg)}
     <button class="btn icon" id="b-theme" title="Light or dark">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
     </button>
+    <button class="btn icon" id="b-briefs" title="Download a brief for every video on screen">
+      <svg viewBox="0 0 24 24"><path d="M14 3H7a1.5 1.5 0 0 0-1.5 1.5v15A1.5 1.5 0 0 0 7 21h10a1.5 1.5 0 0 0 1.5-1.5V7.5z"/><path d="M14 3v4.5h4.5M9 12.5h6M9 16h4"/></svg>
+    </button>
     <button class="btn icon" id="b-csv" title="Download what is on screen as CSV">
       <svg viewBox="0 0 24 24"><path d="M12 3v12M7 11l5 5 5-5M4 20h16"/></svg>
     </button>
@@ -420,6 +489,7 @@ tr.open .caret svg{transform:rotate(90deg)}
           <th class="n" data-sort="save_rate">Saved</th>
           <th class="n" data-sort="creator_followers">Followers</th>
           <th class="n" data-sort="vs_expected">Pace</th>
+          <th style="width:190px">Our idea</th>
           <th style="width:30px"></th>
         </tr></thead>
         <tbody id="rows"></tbody>
@@ -460,6 +530,22 @@ tr.open .caret svg{transform:rotate(90deg)}
   </div>
 </aside>
 
+<aside id="scriptpane">
+  <div class="sp-head">
+    <div>
+      <div class="eyebrow" style="color:var(--warn)">Written for us, not from the video</div>
+      <h2 id="sp-title">&nbsp;</h2>
+      <div class="sp-sub" id="sp-sub">&nbsp;</div>
+    </div>
+    <button class="btn icon" id="sp-close"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+  <div class="sp-body" id="sp-body"></div>
+  <div class="sp-foot">
+    <span class="msg" id="sp-note">Our idea, at their length. Not their script.</span>
+    <button class="btn" id="sp-copy">Copy</button>
+    <button class="btn primary" id="sp-dl">Download</button>
+  </div>
+</aside>
 <div id="tip"></div>
 <div id="toast"><div class="tt" id="toast-t"></div><div class="tb" id="toast-b"></div><div class="bar"></div></div>
 <script>
@@ -469,7 +555,7 @@ const TIER = {EXPLODING:"--t-exploding","BREAKING OUT":"--t-breaking",INTERESTIN
   WATCH:"--t-watch","DAY TWO":"--t-daytwo","TOO OLD":"--t-old","ALREADY VIRAL":"--t-viral"};
 const DARK_TEXT = new Set(["INTERESTING","WATCH"]);   // light pills need dark type
 const S = {rows:[],fields:{},edits:{},tiersCfg:[],tiers:new Set(),jack:false,
-  sort:"radar_score",asc:false,health:null,jobs:[],poll:null,open:new Set()};
+  sort:"radar_score",asc:false,health:null,jobs:[],poll:null,open:new Set(),assign:null};
 
 const cvar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 const fmt  = n => (n==null||n==="") ? "" : Number(n).toLocaleString();
@@ -647,7 +733,14 @@ function metric(value,share,max,good){
     <div class="g"><i style="width:${w}%"></i></div></div>`;
 }
 
+async function loadAssignments(){
+  try{ const all=await get("/api/rows?limit=2000&sort=radar_score");
+       assignBits(all.rows); }
+  catch(e){ S.assign=null; }
+}
+
 async function loadRows(){
+  if(!S.assign) await loadAssignments();
   let d;
   try{ d=await get("/api/rows?"+params()); }
   catch(e){ toast("Could not read the videos",esc(e.message),true); return; }
@@ -678,10 +771,14 @@ async function loadRows(){
       <td class="n">${pct(r.save_rate)}</td>
       <td class="n">${fmt(r.creator_followers)}</td>
       <td class="n">${r.vs_expected?`<b>${Number(r.vs_expected).toFixed(r.vs_expected>=10?0:1)}x</b>`:'<span class="faint">—</span>'}</td>
+      <td class="scriptcell"><button class="hookbtn" title="Read the full script">
+        <span class="hk"></span><span class="go">Read script</span></button></td>
       <td class="expand"><button class="caret" title="Why this score">
         <svg viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button></td>`;
     tr.querySelector(".cap").textContent=unesc(r.title)||"(no caption)";
     tr.querySelector(".caret").onclick=e=>{e.stopPropagation(); toggleDetail(tr,r);};
+    tr.querySelector(".hookbtn .hk").textContent=buildScript(r).hook;
+    tr.querySelector(".hookbtn").onclick=e=>{e.stopPropagation(); openScript(r);};
     tr.onclick=e=>{ if(e.target.closest("a")) return; if(r.url) window.open(r.url,"_blank","noopener"); };
     tb.appendChild(tr);
     if(S.open.has(r.content_id)) toggleDetail(tr,r,true);
@@ -704,6 +801,7 @@ function toggleDetail(tr,r,force){
   if(next && next.classList.contains("detail")) return;
   tr.classList.add("open"); S.open.add(r.content_id);
   const comps=r.components&&Object.keys(r.components).length?r.components:null;
+  const shape=readShape(r);
   const kv=(k,v)=>`<div class="kv"><span>${k}</span><b>${v}</b></div>`;
   const d=document.createElement("tr");
   d.className="detail";
@@ -725,8 +823,30 @@ function toggleDetail(tr,r,force){
         :'<div style="font-size:12px;color:var(--faint)">No reasons recorded.</div>'}
       <div style="margin-top:9px;font-size:11.5px"><a href="${esc(r.url||"#")}" target="_blank"
         rel="noopener" style="color:var(--accent)">Open on TikTok ↗</a></div></div>
+  </div>
+  <div class="briefpane">
+    <div class="bp-head">
+      <span class="eyebrow">Creator brief</span>
+      <span class="bp-shape">${esc(shape.kind)} · rebuild at ${Math.round(Number(r.duration_seconds)||0)}s</span>
+      <button class="btn bp-copy">Copy</button>
+      <button class="btn bp-dl">Download</button>
+    </div>
+    <p class="bp-why">${esc(shape.why)}</p>
+    <p class="bp-why"><b>${esc(shape.build)}</b></p>
+    <ol class="beats">${buildScript(r).beats
+      .map(b=>`<li><span class="bt">${b.t}</span><span class="bw">${esc(b.who)}</span><span>${esc(b.line)}</span></li>`).join("")}</ol>
+    <div class="bp-cap"><b>Caption</b> ${esc(buildScript(r).caption)}<br>
+      <span class="tags">${esc(buildScript(r).tags)}</span></div>
+    <div class="bp-foot">Nobody here has watched this video. Open the link, match the pacing.
+      These beats and this length come from its numbers.</div>
   </div></td>`;
   tr.after(d);
+  d.querySelector(".bp-dl").onclick=()=>downloadBrief(r);
+  d.querySelector(".bp-copy").onclick=async e=>{
+    try{ await navigator.clipboard.writeText(buildBrief(r));
+      e.currentTarget.textContent="Copied"; setTimeout(()=>e.currentTarget.textContent="Copy",1400);
+    }catch(x){ toast("Could not copy","Your browser blocked clipboard access. Use Download.",true,4000); }
+  };
 }
 
 function renderStats(d){
@@ -889,6 +1009,7 @@ function startPolling(){
 }
 
 async function refreshAll(){
+  S.assign=null;
   await Promise.allSettled([loadHealth(),loadFacets(),loadCost()]);
   await loadRows();
 }
@@ -1010,6 +1131,621 @@ async function save(){
   }catch(e){ m.className="msg err"; m.textContent="Not saved: "+e.message; }
 }
 
+/* ---------- creator briefs ----------
+   A brief is only useful if it is specific to the video it came from, so every
+   line below is derived from that row: the length sets the beat count, and the
+   split between saves and shares sets what kind of video it was. Nobody here has
+   watched these videos, so the brief says so and sends the creator to the link. */
+const NEVER_SAY = [
+  "Guaranteed fluency, or fluent in any number of days",
+  "Replaces a teacher. It is practice, not a replacement",
+  "Certified or accredited. It is neither",
+  "Job or visa outcomes. Never tie speaking practice to getting hired"
+];
+
+function clock(sec){ sec=Math.max(0,Math.round(sec));
+  return Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0"); }
+
+function readShape(r){
+  const views=Number(r.views)||0, sh=Number(r.shares)||0, sv=Number(r.saves)||0;
+  const shareRate=Number(r.share_rate)||0, likeRate=views?(Number(r.likes)||0)/views:0;
+  if(shareRate>=0.01) return {
+    kind:"Passed along",
+    why:`${(shareRate*100).toFixed(2)}% of viewers shared it. That is somebody sending it to a specific person, which means the joke was about them both.`,
+    build:"One punchline. No setup, no demo, no call to action. The whole video is the line and the reaction to it."};
+  if(sv>sh && sv>0) return {
+    kind:"Filed to try later",
+    why:`${sv} saves against ${sh} shares. Nobody passed this around, they saved it to try. On an app video that is buy intent sitting in a saved folder.`,
+    build:"Show the thing working. The viewer needs to picture themselves running the same test, so keep the demo real time and unedited."};
+  if(likeRate>=0.05) return {
+    kind:"Held the people who saw it",
+    why:`${(likeRate*100).toFixed(1)}% like rate. Strong reaction from a small audience, so the idea works and the reach did not follow.`,
+    build:"Same idea, posted by a smaller account that talks like a person rather than a brand."};
+  return {
+    kind:"Reach without reaction",
+    why:`${views.toLocaleString()} views but ${sh} shares and ${sv} saves. The algorithm pushed it and almost nobody did anything about it.`,
+    build:"Treat this as a warning. Rebuild the hook before rebuilding the video."};
+}
+
+function beatSheet(dur){
+  const d=Math.max(5,Math.round(dur||20));
+  if(d<10) return [[0,"Hook. Already mid conversation. No intro, no logo, no face yet."],
+    [Math.round(d*0.2),"The learner says one line to the cat."],
+    [Math.round(d*0.5),"The cat answers with the punchline. This is the whole video."],
+    [Math.round(d*0.8),"Cut to the learner's face. One reaction, no words. Hard cut out."]];
+  if(d<=25) return [[0,"Hook. One sentence that makes the viewer want the answer."],
+    [Math.round(d*0.18),"Set it up. What the learner is about to try."],
+    [Math.round(d*0.42),"The cat's line. The turn. Funnier or sharper than expected."],
+    [Math.round(d*0.68),"The learner reacts, then gets it right."],
+    [Math.round(d*0.88),"Close. App icon, cat waves. One short line."]];
+  if(d<=45) return [[0,"Hook. A test the viewer can picture running themselves."],
+    [Math.round(d*0.1),"The setup. Say the thing, deliberately, on camera."],
+    [Math.round(d*0.25),"Beat of silence. Let the cat react before it speaks."],
+    [Math.round(d*0.33),"The cat catches it and names exactly what was wrong."],
+    [Math.round(d*0.48),"Laugh. Try again. Get it right."],
+    [Math.round(d*0.62),"The one honest line. Sell the problem, not the app."],
+    [Math.round(d*0.8),"The routine. How little time this actually takes."],
+    [Math.round(d*0.92),"Close. App icon, cat waves."]];
+  return [[0,"Hook."],[Math.round(d*0.2),"Setup."],[Math.round(d*0.45),"The cat's line."],
+    [Math.round(d*0.7),"Payoff."],[Math.round(d*0.9),"Close."],
+    [d,"NOTE: "+d+" seconds is long. Nothing over 45 seconds worked in this run. Cut to 30."]];
+}
+
+/* ---------- the script writer ----------
+   Every row gets a real script, not a blank template. What the video did decides
+   the shape, its length decides the beat count, and its own caption decides the
+   angle where it gives one away. The lines come from banks picked by a hash of
+   the video id, so two rows never read the same and a row reads the same every
+   time you open it. */
+const ANGLE_TESTS = [
+  ["lifechange", /moved|moving|mudei|me mud|umgezogen|переехал/i],
+  ["comedy",     /jaja|haha|lol|ㅋㅋ|😂|🤣|exagera|odiada|바보/i],
+  ["proof",      /conversation|conversaci|whole|actually|practice|практи|pratique/i],
+  ["problem",    /\?|why|porque|perch|почему|freeze|falls apart/i],
+];
+
+/* A bit is a whole idea: the hook, what the cat says back, and the line out.
+   They travel together, because picking a hook and a punchline from separate
+   banks gave us a learner asking about their accent and a cat answering about
+   coffee. One per video, assigned below, so no two rows read the same. */
+const BITS = [
+/* --- comedy: the cat is the funny one, never the learner ------------------ */
+{angle:"comedy", hook:"I asked my AI tutor to be honest about my accent.",
+ setup:"Waits. Actually looks nervous about the answer.",
+ cat:"Define native. Half of them say supposably.",
+ cat2:"Your accent is fine. Your confidence needs a minute.",
+ close:"Still cannot believe I practice English with a cat now.",
+ caption:"asked it to be honest about my accent and it turned on the whole country"},
+
+{angle:"comedy", hook:"Ten minutes trying to make this thing lose its patience.",
+ setup:"Talks fast, drops a word from their first language mid sentence.",
+ cat:"I genuinely do not know what the thing is. Describe it to me.",
+ cat2:"Butter? A tomato? A whole onion? I am invested now.",
+ close:"That is it. That is the entire thing.",
+ caption:"tried to confuse my ai tutor and it started asking follow up questions"},
+
+{angle:"comedy", hook:"I apologised to an AI for my grammar.",
+ setup:"Says a full, correct sentence. Immediately says sorry.",
+ cat:"That was grammatically perfect and you still apologised. Why.",
+ cat2:"Say it again. No sorry this time.",
+ close:"That is it. That is the entire thing.",
+ caption:"why do i say sorry after speaking english correctly"},
+
+{angle:"comedy", hook:"I tried to teach my AI tutor slang.",
+ setup:"Explains one piece of slang badly, on purpose.",
+ cat:"So I would say that at a funeral. Got it.",
+ cat2:"No, teach me properly. I will use it on the next person.",
+ close:"I am not responsible for what it says next.",
+ caption:"taught the cat slang and immediately regretted it"},
+
+{angle:"comedy", hook:"I asked it to rate my English out of ten.",
+ setup:"Says a sentence, then asks for the number.",
+ cat:"I do not give numbers. Numbers make people stop talking.",
+ cat2:"Say three more sentences and then ask me again.",
+ close:"It has never given me the number.",
+ caption:"asked for a score and got therapy instead"},
+
+{angle:"comedy", hook:"I said one sentence perfectly and demanded applause.",
+ setup:"Nails a long sentence. Turns to the camera, waiting.",
+ cat:"That was clean. I am clapping. You cannot hear it.",
+ cat2:"Do another one before the confidence wears off.",
+ close:"Ten minutes a day and the cat is my whole support system.",
+ caption:"nobody was around so the cat had to do it"},
+
+{angle:"comedy", hook:"It misheard one word and never recovered.",
+ setup:"Says a normal sentence. The app hears something else entirely.",
+ cat:"You bought a horse? At the supermarket?",
+ cat2:"Say it again. Slowly. I want the horse to be real.",
+ close:"Say something wrong to it and watch what it does.",
+ caption:"it thought i bought a horse at the supermarket"},
+
+{angle:"comedy", hook:"I told it I would practice tomorrow. It remembered tomorrow.",
+ setup:"Opens the app after skipping a day. Sheepish.",
+ cat:"Yesterday you said tomorrow. It is tomorrow.",
+ cat2:"Ten minutes. I will not bring it up again.",
+ close:"Ten minutes before bed. Nobody watching me get it wrong.",
+ caption:"being held accountable by a cat is a new low and it is working"},
+
+{angle:"comedy", hook:"I asked it to talk to me like my manager does.",
+ setup:"Sets the scene. The cat changes tone completely.",
+ cat:"So. Walk me through where we are on this.",
+ cat2:"You paused. In a real meeting that pause is fine. Take it.",
+ close:"Practicing the meeting is easier than surviving the meeting.",
+ caption:"made the cat do a standup and now i am stressed"},
+
+{angle:"comedy", hook:"I made it try my first language.",
+ setup:"Asks the cat to say one phrase back. It mangles it.",
+ cat:"That was terrible. Now you know how brave you are being.",
+ cat2:"My turn is over. Your turn.",
+ close:"Turns out it is bad at something too.",
+ caption:"the cat tried my language and humbled itself"},
+
+{angle:"comedy", hook:"I asked the difference between two words I always mix up.",
+ setup:"Asks the question out loud, badly phrased.",
+ cat:"One of them is a feeling. The other one is a chair. You used the chair.",
+ cat2:"Use both in a sentence. I will stop you when it goes wrong.",
+ close:"I have not mixed them up since.",
+ caption:"i have been using the chair word for two years"},
+
+{angle:"comedy", hook:"I got annoyed and swore in English.",
+ setup:"Frustrated after a long sentence falls apart.",
+ cat:"Correct word. Wrong tense. Try again, angrier.",
+ cat2:"There it is. Now say the actual sentence.",
+ close:"It never once made me feel stupid. That is the whole point.",
+ caption:"first time the cat has ever approved of my grammar"},
+
+{angle:"comedy", hook:"It read my week back to me like a report card.",
+ setup:"Opens the app on a Sunday. Cat has notes.",
+ cat:"Four days. Twenty two minutes. You said the word maybe forty one times.",
+ cat2:"Forty one. Say something you actually mean this week.",
+ close:"Ten minutes a day and it keeps receipts.",
+ caption:"the cat counted how many times i said maybe and i am unwell"},
+
+{angle:"comedy", hook:"I ignored it for five days. It had one line ready.",
+ setup:"Opens the app after a long gap. Winces.",
+ cat:"No lecture. Just say one sentence and we are even.",
+ cat2:"That was it. We are even.",
+ close:"Ten minutes before bed. That is the whole routine.",
+ caption:"came back after five days and it did not make it weird"},
+/* --- proof: show it working, unedited. These earn saves ------------------- */
+{angle:"proof", hook:"I said it wrong on purpose to see if it would catch me.",
+ setup:"Says it deliberately flat: I want to ordering a coffee.",
+ cat:"Order. I want to order a coffee. You added a whole syllable and I felt it.",
+ cat2:"Again, slower. Not for me. For you.",
+ close:"Go say something wrong to it. See how fast it catches you.",
+ caption:"i said it wrong on purpose and it caught me in two seconds"},
+
+{angle:"proof", hook:"I gave it the sentence I always get stuck on.",
+ setup:"No typing. Just says it, badly, three times in a row.",
+ cat:"Stop. That was it. That was the sentence.",
+ cat2:"You just used a word I had to look up. Write that one down.",
+ close:"Ten minutes before bed. Nobody watching me get it wrong.",
+ caption:"the cat has no notes. the cat has many notes."},
+
+{angle:"proof", hook:"Day four of talking to a cat every morning before work.",
+ setup:"Screen recording, coffee in frame, half awake.",
+ cat:"You are faster than you were on Monday. Noticeably.",
+ cat2:"Do not stop now. This is the annoying part.",
+ close:"Ten minutes on the walk to work. That is the whole routine.",
+ caption:"practicing out loud where nobody can hear me being bad at it"},
+
+{angle:"proof", hook:"One take. No edits. Watch me get it wrong first.",
+ setup:"Holds the phone up. Whole conversation runs in real time.",
+ cat:"Keep going. You do not have to fix it mid sentence.",
+ cat2:"See? You finished it. That is the part you skip.",
+ close:"No cuts in this video. That is the point.",
+ caption:"unedited because the edited version is not the real thing"},
+
+{angle:"proof", hook:"Practicing my coffee order before I say it to a human.",
+ setup:"Stood outside the cafe. Phone up. Rehearsing.",
+ cat:"Good. Now say it again like you are not reading it.",
+ cat2:"That one. Go inside.",
+ close:"Two minutes outside beats ten minutes of dread.",
+ caption:"rehearsed my order outside the cafe like a normal person"},
+
+{angle:"proof", hook:"One in the morning, practicing an interview answer.",
+ setup:"Lamp on. Talking quietly. Clearly nervous.",
+ cat:"Say it once more, but shorter. You are explaining, not defending.",
+ cat2:"That version is the one. Sleep.",
+ close:"Nobody else was going to be awake for this.",
+ caption:"1am and the only thing awake was the cat"},
+
+{angle:"proof", hook:"I made it role play the phone call I keep avoiding.",
+ setup:"Sets up the scenario out loud. Braces.",
+ cat:"Hello, how can I help you today?",
+ cat2:"You got through it. The real one will be shorter.",
+ close:"I made the call the next morning.",
+ caption:"practiced the phone call i had been avoiding for three weeks"},
+
+{angle:"proof", hook:"Same sentence, day one and day ten. Same video.",
+ setup:"Split screen. Old clip on the left, today on the right.",
+ cat:"Left one took eleven seconds. This one took four.",
+ cat2:"Say it once more and I will stop being smug.",
+ close:"Ten days. Ten minutes a day.",
+ caption:"day one vs day ten saying the exact same sentence"},
+
+{angle:"proof", hook:"Reading it, then saying it. Back to back.",
+ setup:"Reads a sentence smoothly. Then tries it without the screen.",
+ cat:"Reading is not speaking. That is why the second one felt harder.",
+ cat2:"Again, without looking. Slower is allowed.",
+ close:"This is the gap nobody tells you about.",
+ caption:"reading english and speaking english are two different sports"},
+
+{angle:"proof", hook:"Practicing the exact thing I have to say tomorrow.",
+ setup:"Says the sentence they need for a real appointment.",
+ cat:"Good. Now say it as if they interrupted you halfway.",
+ cat2:"That one held up. You are ready.",
+ close:"Ten minutes the night before. That is it.",
+ caption:"rehearsing tomorrow out loud tonight"},
+
+{angle:"proof", hook:"I asked it to interrupt me like real people do.",
+ setup:"Starts a sentence. Gets cut off on purpose.",
+ cat:"Sorry, quick question, what do you mean by that?",
+ cat2:"You recovered. In a real conversation that is the whole skill.",
+ close:"Real people interrupt. Practice should too.",
+ caption:"asked it to interrupt me because real conversations do"},
+
+{angle:"proof", hook:"Thirty seconds of small talk. That is the drill.",
+ setup:"Timer on screen. Cat asks one ordinary question.",
+ cat:"Weather, weekend, food. Pick one and keep going for thirty seconds.",
+ cat2:"Twenty nine. You did not switch languages once.",
+ close:"Small talk is a skill and I was never taught it.",
+ caption:"thirty seconds of small talk is harder than any exam i took"},
+
+{angle:"proof", hook:"Saying it out loud twice before the pharmacy.",
+ setup:"In the car. Phone up. Practising one specific sentence.",
+ cat:"Once more. You rushed the middle.",
+ cat2:"That is the one. Go.",
+ close:"Said it clean at the counter. First time.",
+ caption:"practiced in the car and said it clean at the counter"},
+/* --- problem: name the pain, let the product be the relief ---------------- */
+{angle:"problem", hook:"My English is perfect until somebody answers back.",
+ setup:"Opens the app. Cat asks how the day went. Learner stalls.",
+ cat:"You paused for four seconds. Nobody noticed but me, and I am not telling.",
+ cat2:"Take it again from because. You had it.",
+ close:"Ten minutes before bed. Nobody watching me get it wrong.",
+ caption:"i understand english fine. speaking it is the whole problem."},
+
+{angle:"problem", hook:"Six years of English class and I said yes when someone asked how I was.",
+ setup:"Dead stare at the camera. Cut to the app.",
+ cat:"Let us try that again. How is it going?",
+ cat2:"Both of those work. Nobody is grading you.",
+ close:"I just needed somewhere to be bad at it first.",
+ caption:"somebody said hows it going and i said yes. so now i practice with a cat."},
+
+{angle:"problem", hook:"I can write the email. I cannot say the email.",
+ setup:"Shows a perfectly written message, then tries to say it out loud.",
+ cat:"Reading is not speaking. That is why this one feels harder.",
+ cat2:"Again, without looking at the screen.",
+ close:"I just needed somewhere to be bad at it first.",
+ caption:"perfect on paper, falls apart out loud. working on it."},
+
+{angle:"problem", hook:"I build the sentence in my head and then say nothing.",
+ setup:"Stares into the middle distance. Mouths a sentence silently.",
+ cat:"Say the messy version. The perfect one never arrives in time.",
+ cat2:"That was messy and completely understandable. Keep it.",
+ close:"Ten minutes a day of saying the messy version.",
+ caption:"by the time the sentence is ready the conversation has moved on"},
+
+{angle:"problem", hook:"I understand the whole meeting. I say nothing in the whole meeting.",
+ setup:"Laptop closed. To camera. Flat.",
+ cat:"Practice the one sentence you wanted to say today.",
+ cat2:"Now shorter. People interrupt long sentences.",
+ close:"Said it in the next meeting. Out loud.",
+ caption:"i understand every word in the meeting and contribute none of them"},
+
+{angle:"problem", hook:"I say sorry before every single sentence.",
+ setup:"Counts it on their fingers. Three sorries in one minute.",
+ cat:"You apologised before a correct sentence. Cut the sorry, keep the sentence.",
+ cat2:"Better. Nobody needs the warning.",
+ close:"Small thing. Changed how I sound completely.",
+ caption:"dropping sorry from the front of my sentences changed everything"},
+
+{angle:"problem", hook:"The group switched to English and I went quiet.",
+ setup:"Walking home. Phone up. Honest.",
+ cat:"What did you want to say back there?",
+ cat2:"Say it now. Out loud. Next time it will be there faster.",
+ close:"I practice the thing I wish I had said.",
+ caption:"went quiet when the table switched to english. again."},
+
+{angle:"problem", hook:"I know about four thousand words and I use roughly forty.",
+ setup:"Scrolls their vocabulary app. Then tries to speak.",
+ cat:"Use one word you have never said out loud before. Right now.",
+ cat2:"That is the first time that word has left your mouth.",
+ close:"Knowing a word and saying it are not the same thing.",
+ caption:"i know the words i just never say them"},
+
+{angle:"problem", hook:"I answer the question I prepared for, not the one I was asked.",
+ setup:"Cat asks something simple. Learner gives a rehearsed speech.",
+ cat:"Good answer. Different question. Try the one I asked.",
+ cat2:"Shorter. You do not owe anyone a paragraph.",
+ close:"This is the part school never covered.",
+ caption:"i prepare the answer and then get asked something else"},
+
+{angle:"problem", hook:"I speak fine until somebody actually looks at me.",
+ setup:"Alone, sentence is smooth. Cuts to a shot of them freezing in public.",
+ cat:"Nobody here is looking at you. Say it badly first.",
+ cat2:"That was not badly. That was just quiet.",
+ close:"Practicing where nobody is watching, so that I can speak when they are.",
+ caption:"alone im fluent. in front of a person im a slideshow."},
+
+{angle:"problem", hook:"My pause before I speak is longer than the sentence.",
+ setup:"Timer on screen. Four seconds of silence before a short sentence.",
+ cat:"Four seconds of thinking. One second of talking. Flip it.",
+ cat2:"Two seconds. You are getting faster than you think.",
+ close:"The pause is the thing I am actually training.",
+ caption:"the pause before i speak is the real problem"},
+
+{angle:"problem", hook:"Every time it gets hard I switch back to my own language.",
+ setup:"Mid sentence, gives up, switches. Catches themself.",
+ cat:"Stay in it one more sentence. Just one.",
+ cat2:"You did two. Nobody is timing you.",
+ close:"One more sentence before I switch. That is the whole goal.",
+ caption:"one more sentence before i switch back. thats the whole goal."},
+
+{angle:"problem", hook:"I will send three texts to avoid making one phone call.",
+ setup:"Shows a long text thread that should have been a call.",
+ cat:"Say the call out loud once. Then decide.",
+ cat2:"That took eleven seconds. The texting took twenty minutes.",
+ close:"Made the call. It was eleven seconds.",
+ caption:"three texts to avoid an eleven second phone call"},
+/* --- moved somewhere new ------------------------------------------------- */
+{angle:"lifechange", hook:"Four months here and my English has gotten worse, not better.",
+ setup:"Stops walking. To camera: not the grammar. Out loud, to a person, at normal speed.",
+ cat:"So how was your day?",
+ cat2:"Take it again from because. You had it.",
+ close:"Ten minutes on the walk to work. That is the whole routine.",
+ caption:"four months here and talking got harder, not easier"},
+
+{angle:"lifechange", hook:"First day at the new job. I said almost nothing for eight hours.",
+ setup:"In the car after work. Still in the lanyard.",
+ cat:"What is the first thing you want to be able to say tomorrow?",
+ cat2:"Say it three times. Tomorrow it will be automatic.",
+ close:"Said it at eleven the next morning.",
+ caption:"first day at the new job and i said about nine words"},
+
+{angle:"lifechange", hook:"I moved here for the degree and I freeze in every seminar.",
+ setup:"Library. Headphones in. Quiet practice.",
+ cat:"Say your point to me first. Then say it to them.",
+ cat2:"That was clear. It was always clear.",
+ close:"Practicing the point before the seminar, not after.",
+ caption:"i have the point. getting it out of my mouth is the issue."},
+
+{angle:"lifechange", hook:"My kid corrects my English now.",
+ setup:"Laughing about it. Slightly not laughing about it.",
+ cat:"Then let us get you ahead of them for one week.",
+ cat2:"That sentence was better than mine. Use it at dinner.",
+ close:"Ten minutes while they do homework.",
+ caption:"my eight year old corrects my english and i have decided to fight back"},
+
+{angle:"lifechange", hook:"I passed the exam and then froze at the counter.",
+ setup:"Holds up a certificate. Then mimes freezing.",
+ cat:"The exam tested reading. This tests nerve.",
+ cat2:"Say it once more. That is all the counter needs.",
+ close:"The certificate did not help. Ten minutes a day did.",
+ caption:"passed the test, froze at the counter. nobody warns you."},
+
+{angle:"lifechange", hook:"New city, new coffee order, same silence.",
+ setup:"Outside a cafe. Phone up. One sentence, twice.",
+ cat:"Once more. You rushed the end because you were embarrassed.",
+ cat2:"That one. Go in.",
+ close:"Two minutes outside beats ten minutes of dread.",
+ caption:"new city, same silence at the counter. working on it."},
+
+/* --- progress: the payoff. These are the ones people save ---------------- */
+{angle:"progress", hook:"It noticed I got faster before I did.",
+ setup:"Ordinary practice session. Cat interrupts with an observation.",
+ cat:"You have not paused mid sentence once today.",
+ cat2:"I am telling you because you would not have noticed.",
+ close:"Ten minutes a day. Nine days.",
+ caption:"the cat noticed before i did"},
+
+{angle:"progress", hook:"First time I finished a sentence without stopping in the middle.",
+ setup:"Says a long sentence. Gets all the way to the end. Sits back.",
+ cat:"That was twenty two words. You did not stop once.",
+ cat2:"Do another one before you start doubting it.",
+ close:"Small thing. Felt enormous.",
+ caption:"twenty two words without stopping. thats the whole video."},
+
+{angle:"progress", hook:"Today I argued back in English.",
+ setup:"Recounting it, still a bit surprised.",
+ cat:"Say what you said. I want to hear it.",
+ cat2:"That was direct and polite at the same time. That is hard.",
+ close:"Six weeks ago I would have nodded and said nothing.",
+ caption:"i disagreed with someone in english today and survived"},
+
+{angle:"progress", hook:"It played back my first ever recording.",
+ setup:"Opens an old clip. Immediate cringe.",
+ cat:"That was day one. Say the same sentence now.",
+ cat2:"Same words. Half the time. No pause.",
+ close:"Do not delete your day one recording.",
+ caption:"my day one recording is humiliating and i am keeping it"},
+
+{angle:"progress", hook:"I made a joke in English and someone actually laughed.",
+ setup:"Grinning. Cannot quite believe it.",
+ cat:"Say it again. I want to see the timing.",
+ cat2:"The timing is the hard part and you had it.",
+ close:"Jokes were the thing I thought I would never get.",
+ caption:"made a joke in english and it landed. unreal."},
+
+{angle:"progress", hook:"First phone call I did not rehearse first.",
+ setup:"Hangs up. Looks at the phone. Then at the camera.",
+ cat:"No script this time.",
+ cat2:"Say one sentence anyway. Keep the habit.",
+ close:"Three months ago I would have sent a text.",
+ caption:"picked up the phone without writing down what to say first"},
+];
+
+const TAGSETS = [
+  "#learnenglish #englishspeaking #speakenglish #aitutor #fyp",
+  "#learnenglish #englishpractice #esl #speakingpractice #fyp",
+  "#englishspeaking #languagelearning #aitutor #foryoupage",
+  "#learnenglish #english #speakingenglish #eslteacher #fyp",
+];
+function hash(str){ let h=2166136261;
+  for(const c of String(str||"x")) h=Math.imul(h^c.charCodeAt(0),16777619);
+  return Math.abs(h); }
+const pick = (bank,seed,salt) => bank[(hash(seed)+salt)%bank.length];
+
+function angleOf(r){
+  const blob=`${r.title||""}`;
+  for(const [name,re] of ANGLE_TESTS) if(re.test(blob)) return name;
+  const shape=readShape(r);
+  if(shape.kind==="Passed along") return "comedy";
+  if(shape.kind==="Filed to try later") return "proof";
+  return "problem";
+}
+
+/* Assign one bit to each video, best angle first, and never hand the same bit
+   to two videos. Done over the whole set rather than per screen, so filtering
+   never changes the script a video already has. */
+function assignBits(rows){
+  const taken=new Set(), map={};
+  const order=[...rows].sort((a,b)=>(Number(b.radar_score)||0)-(Number(a.radar_score)||0));
+  for(const r of order){
+    const want=angleOf(r);
+    let i=BITS.findIndex((b,ix)=>b.angle===want && !taken.has(ix));
+    if(i<0) i=BITS.findIndex((b,ix)=>!taken.has(ix));
+    if(i<0){ i=hash(r.content_id||r.url)%BITS.length; }   // more videos than bits
+    else taken.add(i);
+    map[r.content_id||r.url]=i;
+  }
+  S.assign=map;
+}
+
+function buildScript(r){
+  const d=Math.max(6,Math.round(Number(r.duration_seconds)||20));
+  const seed=r.content_id||r.url||r.creator;
+  const angle=angleOf(r), shape=readShape(r);
+  const idx=S.assign?.[r.content_id||r.url];
+  const bit=(idx!=null&&BITS[idx]) ? BITS[idx]
+    : pick(BITS.filter(b=>b.angle===angle).length?BITS.filter(b=>b.angle===angle):BITS,seed,0);
+  const tags=pick(TAGSETS,seed,5);
+  const t=f=>clock(Math.round(d*f));
+  let beats;
+  if(d<10){
+    beats=[
+      {t:t(0),  who:"Screen", line:"Already mid conversation. No intro, no logo, no face."},
+      {t:t(.18),who:"Learner",line:bit.hook},
+      {t:t(.5), who:"Cat",    line:bit.cat},
+      {t:t(.8), who:"Cut",    line:"Learner's face. One reaction, no words. Hard cut out."}];
+  } else if(d<=20){
+    beats=[
+      {t:t(0),   who:"Learner",line:bit.hook},
+      {t:t(.22), who:"Screen", line:bit.setup},
+      {t:t(.48), who:"Cat",    line:bit.cat},
+      {t:t(.7),  who:"Learner",line:"Reacts. Says it again, properly this time."},
+      {t:t(.88), who:"Close",  line:bit.close}];
+  } else if(d<=34){
+    beats=[
+      {t:t(0),   who:"Learner",line:bit.hook},
+      {t:t(.16), who:"Screen", line:bit.setup},
+      {t:t(.3),  who:"Beat",   line:"Half a second of nothing. Cat blinks."},
+      {t:t(.38), who:"Cat",    line:bit.cat},
+      {t:t(.56), who:"Learner",line:"Laughs. Tries it again."},
+      {t:t(.68), who:"Cat",    line:bit.cat2},
+      {t:t(.82), who:"Learner",line:"Straight to camera, not smiling now: I know the words. I freeze the second somebody is actually listening."},
+      {t:t(.93), who:"Close",  line:bit.close}];
+  } else {
+    beats=[
+      {t:t(0),   who:"Learner",line:bit.hook},
+      {t:t(.12), who:"Screen", line:bit.setup},
+      {t:t(.24), who:"Beat",   line:"Half a second of nothing. Cat blinks."},
+      {t:t(.32), who:"Cat",    line:bit.cat},
+      {t:t(.46), who:"Learner",line:"Laughs. Tries it again. Gets it."},
+      {t:t(.58), who:"Cat",    line:bit.cat2},
+      {t:t(.7),  who:"Learner",line:"Straight to camera: I know the words. I freeze the second somebody is actually listening."},
+      {t:t(.84), who:"Screen", line:"Fast scrub back through four or five past conversations."},
+      {t:t(.93), who:"Close",  line:bit.close},
+      {t:clock(d),who:"Note",  line:d+" seconds is long. Nothing over 45 seconds worked in this run. Cut it to 30 if it drags."}];
+  }
+  return {hook:bit.hook, angle, shape, seconds:d, beats, caption:bit.caption, tags};
+}
+
+function buildBrief(r){
+  const tier=retier(r), shape=readShape(r), d=Math.round(Number(r.duration_seconds)||0);
+  const views=Number(r.views)||0, foll=Number(r.creator_followers)||0;
+  const L=[];
+  L.push(`# Creator brief: @${r.creator||"unknown"}`);
+  L.push("");
+  L.push(`**Reference video** ${r.url||""}`);
+  L.push("");
+  L.push("Nobody on our side has watched this video. Everything below comes from its numbers");
+  L.push("and its caption. Open the link, watch it twice, and match the pacing and the energy.");
+  L.push("The brief gives you the beats and the length. The video gives you the rhythm.");
+  L.push("");
+  L.push("## What it did");
+  L.push("");
+  L.push(`| | |`);
+  L.push(`|---|---|`);
+  L.push(`| Brand | ${r.competitor||"unknown"} |`);
+  L.push(`| Tier | ${tier} |`);
+  L.push(`| Views | ${views.toLocaleString()} in ${Math.round(Number(r.age_hours)||0)} hours |`);
+  L.push(`| Creator | ${foll.toLocaleString()} followers |`);
+  L.push(`| Length | ${d} seconds |`);
+  L.push(`| Likes | ${(Number(r.likes)||0).toLocaleString()}${views?" ("+((Number(r.likes)||0)/views*100).toFixed(1)+"%)":""} |`);
+  L.push(`| Shares | ${(Number(r.shares)||0).toLocaleString()} (${((Number(r.share_rate)||0)*100).toFixed(2)}%) |`);
+  L.push(`| Saves | ${(Number(r.saves)||0).toLocaleString()} |`);
+  L.push(`| Pace | ${r.vs_expected?Number(r.vs_expected).toFixed(1)+"x what a video that age normally has":"not measurable"} |`);
+  if(r.title) L.push(`| Caption | ${String(r.title).replace(/\|/g,"/").slice(0,160)} |`);
+  L.push("");
+  L.push("## What kind of video this is");
+  L.push("");
+  L.push(`**${shape.kind}.** ${shape.why}`);
+  L.push("");
+  L.push(shape.build);
+  if(isJack(r)) L.push(`\nThis came from a ${foll.toLocaleString()} follower account. The content earned the reach, not the audience. That is the shape worth copying.`);
+  L.push("");
+  L.push(`## Our version, ${d||20} seconds`);
+  L.push("");
+  L.push("Same length and same beat count as the reference. Our own words, our own joke.");
+  L.push("We are not re-shooting their video with our cat in it: a near duplicate of something");
+  L.push("already circulating reads as derivative and gets treated as reused content.");
+  L.push("");
+  const sc=buildScript(r);
+  L.push("| Time | Who | Line |");
+  L.push("|---|---|---|");
+  for(const b of sc.beats) L.push(`| ${b.t} | ${b.who} | ${b.line.replace(/\|/g,"/")} |`);
+  L.push("");
+  L.push("## Caption and hashtags");
+  L.push("");
+  L.push(sc.caption);
+  L.push("");
+  L.push(sc.tags);
+  L.push("");
+  L.push("Reference caption, for tone only: " + (r.title ? `\`${String(r.title).slice(0,120)}\`` : "hashtags only"));
+  L.push("");
+  L.push("## How to shoot it");
+  L.push("");
+  L.push("- Vertical, phone, no lighting kit. It has to look like somebody who uses the app.");
+  L.push("- The cat gets the funny line. The product is the entertaining one.");
+  L.push("- Never make the learner the joke. The cat is on their side.");
+  L.push("- Match the length. Do not stretch a short one.");
+  L.push("");
+  L.push("## Never say, in any video");
+  L.push("");
+  for(const n of NEVER_SAY) L.push(`- ${n}`);
+  L.push("");
+  return L.join("\n");
+}
+
+function saveText(name,text){
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([text],{type:"text/markdown"}));
+  a.download=name; a.click(); URL.revokeObjectURL(a.href);
+}
+function downloadBrief(r){
+  const who=(r.creator||"video").replace(/[^a-z0-9._-]/gi,"");
+  saveText(`brief-${who}-${r.content_id||""}.md`, buildBrief(r));
+  toast("Brief downloaded",`@${r.creator||""}, ${Math.round(Number(r.duration_seconds)||0)} seconds, beats matched to the original.`,false,4500);
+}
+function downloadAllBriefs(){
+  if(!S.rows.length) return toast("Nothing to write","No videos on screen.",true,4000);
+  const text=S.rows.map(buildBrief).join("\n\n---\n\n");
+  saveText(`creator-briefs-${new Date().toISOString().slice(0,10)}.md`, text);
+  toast("Briefs downloaded",`${S.rows.length} brief${S.rows.length===1?"":"s"} in one file, in the order on screen.`,false,5000);
+}
+
 function exportCsv(){
   const cols=["radar_score","takeoff_tier","url","title","creator","creator_followers","competitor",
     "published_at","age_hours","views","likes","comments","shares","saves","share_rate","save_rate",
@@ -1023,14 +1759,110 @@ function exportCsv(){
   toast("CSV downloaded",`${S.rows.length} videos, exactly what is on screen.`,false,4000);
 }
 
+/* ---------- the script sheet ---------- */
+let SP_ROW=null;
+const TSCACHE={};
+
+/* The real thing when tools/transcribe.py has been run on this video, and a
+   plain statement that we do not have it when it has not. */
+async function realScript(r){
+  const id=r.content_id||"";
+  if(!id) return null;
+  if(id in TSCACHE) return TSCACHE[id];
+  try{ const t=await get("/api/transcript/"+encodeURIComponent(id));
+       TSCACHE[id]=t.found?t:null; }
+  catch(e){ TSCACHE[id]=null; }
+  return TSCACHE[id];
+}
+
+function realScriptHtml(t){
+  /* A cut and the line spoken over it are one moment, not two. Rounding each to
+     the nearest half second printed the same sentence twice, so the marks get
+     clustered first and everything inside a cluster belongs to that row. */
+  const raw=[...t.scenes.map(s=>s.t), ...t.segments.map(s=>s.start)].sort((a,b)=>a-b);
+  const marks=[];
+  for(const m of raw) if(!marks.length || m-marks[marks.length-1]>1.0) marks.push(m);
+
+  const rows=marks.map((m,i)=>{
+    const upper = i+1<marks.length ? marks[i+1] : Infinity;
+    const inWindow = v => v>=m-0.25 && v<upper-0.25;
+    const on=t.scenes.filter(s=>inWindow(s.t)).map(s=>s.ocr).filter(Boolean).join(" / ");
+    const said=t.segments.filter(s=>inWindow(s.start)).map(s=>s.text).join(" ");
+    if(!on && !said) return "";
+    return `<div class="beatrow"><span class="t">${clock(m)}</span>
+      <span class="w">${said?"SAID":"ON SCREEN"}</span>
+      <span class="l">${esc(said||on)}${said&&on
+        ? `<br><span style="color:var(--faint);font-size:11.5px">on screen: ${esc(on)}</span>` : ""}</span></div>`;
+  }).join("");
+
+  return `<div class="realbadge">From the video · ${t.duration}s · ${esc(t.language||"")}
+    · ${t.segments.length} lines, ${t.scenes.length} scenes</div>${rows||
+    '<p class="sp-read">No speech and no on screen text found in this one.</p>'}`;
+}
+
+function openScript(r){
+  SP_ROW=r;
+  const sc=buildScript(r), tier=retier(r);
+  $("#sp-title").textContent=sc.hook;
+  $("#sp-sub").textContent=`@${r.creator||""} · ${r.competitor||""} · rebuild at ${sc.seconds}s · ${tier}`;
+  $("#sp-body").innerHTML=`
+    <p class="sp-read sp-warn" style="border-color:var(--warn)"><b>This is not what happens in their video.</b>
+      Nobody has watched it. This is an idea written for us, shaped by what the numbers say the
+      video did and how long it ran. To get the real thing we need the transcript and a scene by
+      scene description from Apify, which needs credit on the account.</p>
+    <a class="sp-ref" href="${esc(r.url||"#")}" target="_blank" rel="noopener">${esc((r.url||"").replace("https://www.",""))} ↗</a>
+    <p class="sp-read"><b>${esc(sc.shape.kind)}.</b> ${esc(sc.shape.why)}<br><br>${esc(sc.shape.build)}</p>
+    ${sc.beats.map(b=>`<div class="beatrow ${b.who==="Cat"?"is-cat":""}${b.who==="Note"?"is-note":""}">
+      <span class="t">${b.t}</span><span class="w">${esc(b.who)}</span><span class="l">${esc(b.line)}</span></div>`).join("")}
+    <div class="sp-cap"><div class="eyebrow">Caption</div>
+      <div class="c">${esc(sc.caption)}</div>
+      <span class="tags">${esc(sc.tags)}</span></div>
+    <p class="sp-read" style="margin-top:14px">Nobody here has watched this video. Open the link,
+      watch it twice, match the pacing. We rebuild the shape at the same length, never the footage:
+      a near copy of something already circulating reads as derivative and gets treated as reused content.</p>`;
+  $("#scriptpane").classList.add("open");
+  scrim.classList.add("on");
+
+  realScript(r).then(t=>{
+    if(SP_ROW!==r) return;
+    const box=document.createElement("div");
+    box.className="realwrap";
+    box.innerHTML = t ? realScriptHtml(t) :
+      `<div class="realbadge missing">We do not have their script</div>
+       <p class="sp-read">Nobody has watched this video and no transcript has been made of it.
+       To get the real one, on a machine that can reach TikTok:<br>
+       <code>python tools/transcribe.py --url ${esc(r.url||"")}</code><br>
+       It downloads the video, reads the speech and the on screen text, and this panel
+       then shows what is actually in it above our idea.</p>`;
+    $("#sp-body").prepend(box);
+    if(t){
+      // We have their script now, so the warning above ours would contradict it.
+      const w=$("#sp-body").querySelector(".sp-warn");
+      if(w) w.innerHTML='<b>Below is our idea, not theirs.</b> Their actual script is at the top.';
+      $("#sp-note").textContent="Their script, and ours underneath.";
+    }
+  });
+}
+function closeScript(){ $("#scriptpane").classList.remove("open");
+  if(!drawer.classList.contains("open")) scrim.classList.remove("on"); }
+
 /* ---------- wiring ---------- */
 const drawer=$("#drawer"), scrim=$("#scrim");
 const openDrawer=on=>{ drawer.classList.toggle("open",on); scrim.classList.toggle("on",on);
   $("#b-settings").classList.toggle("on",on); };
 $("#b-settings").onclick=()=>openDrawer(!drawer.classList.contains("open"));
 $("#b-close").onclick=()=>openDrawer(false);
-scrim.onclick=()=>openDrawer(false);
+scrim.onclick=()=>{ openDrawer(false); closeScript(); };
+$("#sp-close").onclick=closeScript;
+$("#sp-dl").onclick=()=>SP_ROW&&downloadBrief(SP_ROW);
+$("#sp-copy").onclick=async e=>{
+  if(!SP_ROW) return;
+  try{ await navigator.clipboard.writeText(buildBrief(SP_ROW));
+    e.currentTarget.textContent="Copied"; setTimeout(()=>e.currentTarget.textContent="Copy",1400);
+  }catch(x){ toast("Could not copy","Your browser blocked clipboard access. Use Download.",true,4000); }
+};
 $("#b-csv").onclick=exportCsv;
+$("#b-briefs").onclick=downloadAllBriefs;
 $("#b-save").onclick=save;
 $("#b-refresh").onclick=async()=>{ const b=$("#b-refresh"); b.disabled=true;
   b.firstElementChild.style.transition="transform .6s"; b.firstElementChild.style.transform="rotate(360deg)";
@@ -1059,7 +1891,7 @@ addEventListener("keydown",e=>{
   if(e.target.matches("input,select,textarea")){ if(e.key==="Escape") e.target.blur(); return; }
   if(e.key==="/"){ e.preventDefault(); $("#f-q").focus(); }
   if(e.key==="r"){ $("#b-refresh").click(); }
-  if(e.key==="Escape"){ openDrawer(false); pop.classList.remove("on"); }
+  if(e.key==="Escape"){ openDrawer(false); closeScript(); pop.classList.remove("on"); }
 });
 addEventListener("resize",debounce(drawPlot,120));
 new MutationObserver(debounce(()=>{drawPlot(); loadRows();},60))
