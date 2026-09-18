@@ -1,7 +1,20 @@
-# Only web/ is ever served. Everything else stays off the internet, including
-# collected data, transcripts, config and the venvs, whatever directory the CLI
-# happens to be pointed at.
-*
-!web/
-!web/**
-!vercel.json
+# Only web/ is served. This is belt and braces on top of outputDirectory, so a
+# stray deploy from the wrong directory cannot publish collected data or config.
+.venv
+.venv-*
+data
+prompts
+config
+src
+tests
+tools
+scripts
+deploy
+workflows
+docs
+competitor-hook-radar
+Claude outputs
+*.tgz
+radar-dashboard.html
+.env
+.git
