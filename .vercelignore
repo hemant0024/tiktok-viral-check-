@@ -1,0 +1,7 @@
+# Only web/ is ever served. Everything else stays off the internet, including
+# collected data, transcripts, config and the venvs, whatever directory the CLI
+# happens to be pointed at.
+*
+!web/
+!web/**
+!vercel.json
