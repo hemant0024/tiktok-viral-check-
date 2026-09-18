@@ -440,9 +440,16 @@ def transcribe_ready() -> dict[str, Any]:
     """Whether tools/transcribe.py has what it needs on this machine."""
     import importlib.util
     import shutil
-    missing = [t for t in ("yt-dlp", "ffmpeg") if shutil.which(t) is None]
-    if importlib.util.find_spec("faster_whisper") is None:
-        missing.append("faster-whisper")
+
+    # yt-dlp and whisper are packages in the interpreter running this dashboard,
+    # not commands on PATH. Looking for them with shutil.which greyed the job out
+    # on a machine where both were installed and working, which is the same bug
+    # that made transcribe.py claim yt-dlp was missing.
+    missing = [name for name, module in (("yt-dlp", "yt_dlp"),
+                                         ("faster-whisper", "faster_whisper"))
+               if importlib.util.find_spec(module) is None]
+    if shutil.which("ffmpeg") is None:
+        missing.append("ffmpeg")
     return {"ready": not missing, "missing": missing,
             "ocr": shutil.which("tesseract") is not None}
 
