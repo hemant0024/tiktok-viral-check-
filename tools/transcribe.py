@@ -51,6 +51,18 @@ def need(tool: str, install: str) -> None:
         sys.exit(f"\n{tool} is not installed.\n  {install}\n")
 
 
+def need_module(module: str, install: str) -> None:
+    """Look for the package inside this interpreter, not on PATH.
+
+    Running .venv/bin/python does not add .venv/bin to PATH, so a yt-dlp that is
+    installed and working still looks missing to shutil.which.
+    """
+    import importlib.util
+    if importlib.util.find_spec(module) is None:
+        sys.exit(f"\n{module.replace('_', '-')} is not installed in this python.\n"
+                 f"  {sys.executable} -m pip install {install}\n")
+
+
 def run(cmd: list[str], **kw) -> subprocess.CompletedProcess:
     return subprocess.run(cmd, capture_output=True, text=True, **kw)
 
@@ -66,7 +78,7 @@ def download(url: str, dest: Path) -> tuple[Path, Path | None]:
     existing = list(dest.glob("video.mp4"))
     if not existing:
         result = run([
-            "yt-dlp", url,
+            sys.executable, "-m", "yt_dlp", url,
             "-f", "mp4",
             "-o", str(stem) + ".%(ext)s",
             "--write-subs", "--write-auto-subs", "--sub-format", "vtt",
@@ -282,7 +294,7 @@ def main() -> None:
                     help="transcribe even when TikTok supplies captions")
     args = ap.parse_args()
 
-    need("yt-dlp", "pip install yt-dlp")
+    need_module("yt_dlp", "yt-dlp")
     need("ffmpeg", "brew install ffmpeg")
 
     if args.url:

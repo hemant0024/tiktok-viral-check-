@@ -32,6 +32,21 @@ echo "python packages"
 "$PIP" install -q --upgrade pip
 "$PIP" install -q yt-dlp faster-whisper
 
+echo "checking"
+"$PY" - <<'CHECK' || exit 1
+import importlib.util as u, shutil, sys
+missing = [n for n, m in (("yt-dlp", "yt_dlp"), ("faster-whisper", "faster_whisper"))
+           if u.find_spec(m) is None]
+if shutil.which("ffmpeg") is None:
+    missing.append("ffmpeg")
+if missing:
+    print("  still missing: " + ", ".join(missing))
+    sys.exit(1)
+print("  yt-dlp, faster-whisper and ffmpeg are all in place")
+if shutil.which("tesseract") is None:
+    print("  tesseract is missing, so on screen text will be skipped")
+CHECK
+
 echo
 echo "Done. Try one video:"
 echo "  $PY tools/transcribe.py --top 1"
