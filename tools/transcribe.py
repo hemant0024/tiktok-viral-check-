@@ -128,7 +128,12 @@ def parse_vtt(path: Path) -> list[dict[str, Any]]:
 
 
 def whisper(video: Path, model: str, translate: bool) -> tuple[list[dict], str]:
-    """Speech to text, locally. Handles every language in the competitor set."""
+    """Speech to text, locally. Handles every language in the competitor set.
+
+    `translate` here means Whisper's translate task, which emits English whatever
+    was spoken. Callers wanting both run this twice; the model is cached between
+    calls so the second pass costs only the decode.
+    """
     try:
         from faster_whisper import WhisperModel
     except ImportError:
@@ -236,9 +241,13 @@ def to_markdown(row: dict, data: dict) -> str:
             return t - 0.25 <= v < upper - 0.25
         on = " / ".join(s["ocr"] for s in data["scenes"] if inside(s["t"]) and s["ocr"])
         said = " ".join(s["text"] for s in data["segments"] if inside(s["start"]))
-        if not on and not said:
+        eng = " ".join(s["text"] for s in data.get("segments_en") or [] if inside(s["start"]))
+        if not on and not said and not eng:
             continue
-        L.append(f"| {clock(t)} | {on.replace('|','/')} | {said.replace('|','/')} |")
+        cell = said.replace("|", "/")
+        if eng and eng.strip() != said.strip():
+            cell = f"{eng.replace('|','/')}<br><i>{cell}</i>" if eng else cell
+        L.append(f"| {clock(t)} | {on.replace('|','/')} | {cell} |")
     L += ["", "## Every word, in order", ""]
     L += [f"**{clock(s['start'])}** {s['text']}" for s in data["segments"]] or ["(no speech found)"]
     return "\n".join(L) + "\n"
@@ -249,8 +258,20 @@ def transcribe_one(row: dict, args) -> dict[str, Any]:
     cid = str(row.get("content_id") or re.sub(r"\D", "", url)[-19:] or "unknown")
     out_json = OUT / f"{cid}.json"
     if out_json.exists() and not args.force:
-        print(f"  have it already: {cid}")
-        return json.loads(out_json.read_text())
+        have = json.loads(out_json.read_text())
+        if not (args.translate and not have.get("segments_en")):
+            print(f"  have it already: {cid}")
+            return have
+        # We have the transcript but not the English, and English was asked for.
+        # The video is still cached, so only the translate pass has to run.
+        cached = CACHE / cid / "video.mp4"
+        if cached.exists():
+            print("  translating the copy we already have ...", flush=True)
+            have["segments_en"], _ = whisper(cached, args.model, translate=True)
+            out_json.write_text(json.dumps(have, ensure_ascii=False, indent=1))
+            (OUT / f"{cid}.md").write_text(to_markdown(row, have), encoding="utf-8")
+            print(f"  added {len(have['segments_en'])} English lines")
+            return have
 
     work = CACHE / cid
     print(f"  downloading @{row.get('creator','')} ...", flush=True)
@@ -264,12 +285,19 @@ def transcribe_one(row: dict, args) -> dict[str, Any]:
         print(f"  transcribing with whisper ({args.model}) ...", flush=True)
         segments, language = whisper(video, args.model, args.translate)
 
+    # English alongside the original. TikTok's own captions are in the spoken
+    # language, so translating needs Whisper even when captions saved us earlier.
+    english: list[dict] = []
+    if args.translate:
+        print("  translating to English ...", flush=True)
+        english, _ = whisper(video, args.model, translate=True)
+
     scenes = [] if args.no_ocr else read_frames(video, scene_times(video, seconds), work / "frames")
 
     data = {"content_id": cid, "url": url, "creator": row.get("creator"),
             "competitor": row.get("competitor"), "duration": round(seconds, 2),
             "language": language, "segments": segments, "scenes": scenes,
-            "source": "local"}
+            "segments_en": english, "source": "local"}
     OUT.mkdir(parents=True, exist_ok=True)
     out_json.write_text(json.dumps(data, ensure_ascii=False, indent=1))
     (OUT / f"{cid}.md").write_text(to_markdown(row, data), encoding="utf-8")

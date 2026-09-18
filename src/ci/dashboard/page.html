@@ -1874,6 +1874,7 @@ function realScriptHtml(t){
   /* A cut and the line spoken over it are one moment, not two. Rounding each to
      the nearest half second printed the same sentence twice, so the marks get
      clustered first and everything inside a cluster belongs to that row. */
+  const EN=t.segments_en&&t.segments_en.length?t.segments_en:null;
   const raw=[...t.scenes.map(s=>s.t), ...t.segments.map(s=>s.start)].sort((a,b)=>a-b);
   const marks=[];
   for(const m of raw) if(!marks.length || m-marks[marks.length-1]>1.0) marks.push(m);
@@ -1883,15 +1884,20 @@ function realScriptHtml(t){
     const inWindow = v => v>=m-0.25 && v<upper-0.25;
     const on=t.scenes.filter(s=>inWindow(s.t)).map(s=>s.ocr).filter(Boolean).join(" / ");
     const said=t.segments.filter(s=>inWindow(s.start)).map(s=>s.text).join(" ");
+    const eng=EN?EN.filter(s=>inWindow(s.start)).map(s=>s.text).join(" "):"";
     if(!on && !said) return "";
+    const lead = eng || said || on;
+    const under = [];
+    if(eng && said && eng.trim()!==said.trim()) under.push(esc(said));
+    if(said && on) under.push("on screen: "+esc(on));
     return `<div class="beatrow"><span class="t">${clock(m)}</span>
       <span class="w">${said?"SAID":"ON SCREEN"}</span>
-      <span class="l">${esc(said||on)}${said&&on
-        ? `<br><span style="color:var(--faint);font-size:11.5px">on screen: ${esc(on)}</span>` : ""}</span></div>`;
+      <span class="l">${esc(lead)}${under.length
+        ? `<br><span style="color:var(--faint);font-size:11.5px">${under.join(" · ")}</span>` : ""}</span></div>`;
   }).join("");
 
   return `<div class="realbadge">From the video · ${t.duration}s · ${esc(t.language||"")}
-    · ${t.segments.length} lines, ${t.scenes.length} scenes</div>${rows||
+    · ${t.segments.length} lines, ${t.scenes.length} scenes${EN?" · shown in English":""}</div>${rows||
     '<p class="sp-read">No speech and no on screen text found in this one.</p>'}`;
 }
 
