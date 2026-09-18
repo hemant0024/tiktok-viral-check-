@@ -9,16 +9,16 @@ set -euo pipefail
 cd "$(dirname "$0")"
 
 PORT="${1:-8787}"
-VENV=".venv"
+. tools/_venv.sh
+ci_venv_ready
 
-if [ ! -d "$VENV" ]; then
-  echo "Making a virtual environment in $VENV (first run only)"
-  python3 -m venv "$VENV"
-  "$VENV/bin/pip" install -q --upgrade pip
-  "$VENV/bin/pip" install -q -e . 2>/dev/null || "$VENV/bin/pip" install -q -r requirements.txt
+if ! "$PY" -c "import yaml, pydantic" >/dev/null 2>&1; then
+  echo "Installing dependencies (first run only)"
+  "$PIP" install -q --upgrade pip
+  "$PIP" install -q -e . 2>/dev/null || "$PIP" install -q -r requirements.txt
 fi
 
 export PYTHONPATH="$PWD/src"
 URL="http://127.0.0.1:$PORT"
 ( sleep 2; command -v open >/dev/null && open "$URL" ) &
-exec "$VENV/bin/python" -m ci dashboard --port "$PORT"
+exec "$PY" -m ci dashboard --port "$PORT"
